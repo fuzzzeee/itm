@@ -52,27 +52,32 @@ namespace UnitTests
                 {
                     foreach (VariabilityMode ModVar in Enum.GetValues(typeof(VariabilityMode)))
                     {
-                        area((int)ModVar, 1, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, (int)SiteCriteria,
-                            (int)SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
-                            (int)p.radio_climate, (int)p.pol, p.timepct, p.locpct, p.confpct, out dbloss0, IntPtr.Zero,
-                            out errnum0);
+                        foreach (var deltaH in new[] { 0, 30, 90, 200, 500 })
+                        {
+                            area((int)ModVar, deltaH, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, (int)SiteCriteria,
+                                (int)SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
+                                (int)p.radio_climate, (int)p.pol, p.timepct, p.locpct, p.confpct, out dbloss0,
+                                IntPtr.Zero,
+                                out errnum0);
 
-                        itm = new Original();
-                        itm.area((int)ModVar, 1, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, (int)SiteCriteria,
-                            (int)SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
-                            (int)p.radio_climate, (int)p.pol, p.timepct, p.locpct, p.confpct, out dbloss1, out _,
-                            out errnum1);
+                            itm = new Original();
+                            itm.area((int)ModVar, deltaH, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000,
+                                (int)SiteCriteria,
+                                (int)SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
+                                (int)p.radio_climate, (int)p.pol, p.timepct, p.locpct, p.confpct, out dbloss1, out _,
+                                out errnum1);
 
-                        Assert.AreEqual(Math.Round(dbloss0, 9), Math.Round(dbloss1, 9));
-                        Assert.AreEqual(errnum0, errnum1);
+                            Assert.AreEqual(Math.Round(dbloss0, 8), Math.Round(dbloss1, 8));
+                            Assert.AreEqual(errnum0, errnum1);
 
-                        itm2 = new Refactored();
-                        itm2.area(ModVar, 1, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, SiteCriteria,
-                            SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
-                            p.radio_climate, p.pol, p.timepct, p.locpct, p.confpct, out dbloss2, out errnum2);
+                            itm2 = new Refactored();
+                            itm2.area(ModVar, deltaH, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, SiteCriteria,
+                                SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
+                                p.radio_climate, p.pol, p.timepct, p.locpct, p.confpct, out dbloss2, out errnum2);
 
-                        Assert.AreEqual(dbloss1, dbloss2);
-                        Assert.AreEqual(errnum1, errnum2);
+                            Assert.AreEqual(dbloss1, dbloss2);
+                            Assert.AreEqual(errnum1, errnum2);
+                        }
                     }
                 }
             }
@@ -81,54 +86,63 @@ namespace UnitTests
         static IEnumerable<Parameters> GetParameters()
         {
             var elevations = new double[] { 4, 500, 108, 106, 105, 107, 109 };
+            var eps_dielect = new[] { 15, 4, 25, 81, 81 };
+            var sgm_conductivity = new[] { 0.005, 0.001, 0.02, 0.01, 5 };
 
-            foreach (var height in GetHeights())
+            foreach (var ht_m in new[] { 2, 5, 10, 50 })
             {
-                foreach (var frq in new[] { 50, 100, 500, 915, 1000, 2000, 5000 })
+                foreach (var frq_mhz in new[] { 50, 100, 500, 915, 1000, 2000, 5000 })
                 {
-                    foreach (var pct in GetPercentages())
+                    foreach (var pct in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
                     {
-                        foreach (RadioClimate rc in Enum.GetValues(typeof(RadioClimate)))
+                        foreach (RadioClimate radio_climate in Enum.GetValues(typeof(RadioClimate)))
                         {
+                            var eno_ns_surfref = 301;
+                            switch (radio_climate)
+                            {
+                                case RadioClimate.Equatorial:
+                                    eno_ns_surfref = 360;
+                                    break;
+                                case RadioClimate.ContinentalSubtropical:
+                                    eno_ns_surfref = 320;
+                                    break;
+                                case RadioClimate.MaritimeTropical:
+                                    eno_ns_surfref = 370;
+                                    break;
+                                case RadioClimate.Desert:
+                                    eno_ns_surfref = 280;
+                                    break;
+                                case RadioClimate.MaritimeTemperateOverLand:
+                                    eno_ns_surfref = 320;
+                                    break;
+                                case RadioClimate.MaritimeTemperateOverSea:
+                                    eno_ns_surfref = 350;
+                                    break;
+                            }
                             foreach (Polarization pol in Enum.GetValues(typeof(Polarization)))
                             {
-                                yield return new Parameters
+                                for (var ground = 0; ground < 5; ground++)
                                 {
-                                    confpct = pct,
-                                    elev = elevations,
-                                    eno_ns_surfref = 310,
-                                    eps_dielect = 15,
-                                    frq_mhz = frq,
-                                    locpct = pct,
-                                    pol = pol,
-                                    radio_climate = rc,
-                                    rht_m = height,
-                                    sgm_conductivity = 0.001,
-                                    tht_m = height,
-                                    timepct = pct
-                                };
+                                    yield return new Parameters
+                                    {
+                                        confpct = pct,
+                                        elev = elevations,
+                                        eno_ns_surfref = eno_ns_surfref,
+                                        eps_dielect = eps_dielect[ground],
+                                        frq_mhz = frq_mhz,
+                                        locpct = pct,
+                                        pol = pol,
+                                        radio_climate = radio_climate,
+                                        rht_m = ht_m,
+                                        sgm_conductivity = sgm_conductivity[ground],
+                                        tht_m = ht_m,
+                                        timepct = pct
+                                    };
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
-
-        static IEnumerable<int> GetHeights()
-        {
-            var rand = new Random();
-            for (var i = 0; i < 10; i++)
-            {
-                yield return rand.Next(1, 100);
-            }
-        }
-
-        static IEnumerable<double> GetPercentages()
-        {
-            var rand = new Random();
-            for (var i = 0; i < 10; i++)
-            {
-                yield return rand.Next(1, 100) / 100.0;
             }
         }
 
