@@ -6,7 +6,7 @@ using static System.Math;
 
 namespace LongleyRice
 {
-    public class Refactored
+    class Refactored
     {
         private class Elevations
         {
@@ -95,21 +95,19 @@ namespace LongleyRice
         // ReSharper disable once InconsistentNaming
         private static double aknfe(double v2)
         {
-            double a;
             if (v2 < 5.76)
-                a = 6.02 + 9.11 * Sqrt(v2) - 1.27 * v2;
+                return 6.02 + 9.11 * Sqrt(v2) - 1.27 * v2;
             else
-                a = 12.953 + 4.343 * Log(v2);
-            return a;
+                return 12.953 + 4.343 * Log(v2);
         }
 
         // ReSharper disable once InconsistentNaming
         private static double fht(double x, double pk)
         {
-            double w, fhtv;
+            double fhtv;
             if (x < 200)
             {
-                w = -Log(pk);
+                var w = -Log(pk);
                 if (pk < 1e-5 || x * Pow(w, 3) > 5495)
                 {
                     fhtv = -117;
@@ -117,14 +115,16 @@ namespace LongleyRice
                         fhtv = 17.372 * Log(x) + fhtv;
                 }
                 else
+                {
                     fhtv = 2.5e-5 * x * x / pk - 8.686 * w - 15;
+                }
             }
             else
             {
                 fhtv = 0.05751 * x - 4.343 * Log(x);
                 if (x < 2000)
                 {
-                    w = 0.0134 * x * Exp(-0.005 * x);
+                    var w = 0.0134 * x * Exp(-0.005 * x);
                     fhtv = (1 - w) * fhtv + w * (17.372 * Log(x) - 117);
                 }
             }
@@ -583,11 +583,11 @@ namespace LongleyRice
         private static readonly Dictionary<RadioClimate, ClimateSettings> _climateSettings = new Dictionary<RadioClimate, ClimateSettings> {
             { RadioClimate.Equatorial, new ClimateSettings (-9.67, 12.7, 144.9e3, 190.3e3, 133.8e3, 2.13, 159.5, 762.2e3, 123.6e3, 94.5e3, 2.11, 102.3, 636.9e3, 134.8e3, 95.6e3, 1.224, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
             { RadioClimate.ContinentalSubtropical, new ClimateSettings (-0.62, 9.19, 228.9e3, 205.2e3, 143.6e3, 2.66, 7.67, 100.4e3, 172.5e3, 136.4e3, 6.87, 15.53, 138.7e3, 143.7e3, 98.6e3, 0.801, 2.161, 1.0, 0.0, 0.0, 0.93, 0.31, 2.00 ) },
-            { RadioClimate.MaritimeTropical, new ClimateSettings (1.26, 15.5, 262.6e3, 185.2e3, 99.8e3, 6.11, 6.65, 138.2e3, 242.2e3, 178.6e3, 10.08, 9.60, 165.3e3, 225.7e3, 129.7e3, 1.380, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
+            { RadioClimate.MaritimeSubtropical, new ClimateSettings (1.26, 15.5, 262.6e3, 185.2e3, 99.8e3, 6.11, 6.65, 138.2e3, 242.2e3, 178.6e3, 10.08, 9.60, 165.3e3, 225.7e3, 129.7e3, 1.380, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
             { RadioClimate.Desert, new ClimateSettings (-9.21, 9.05, 84.1e3, 101.1e3, 98.6e3, 1.98, 13.11, 139.1e3, 132.7e3, 193.5e3, 3.68, 159.3, 464.4e3, 93.1e3, 94.2e3, 1.000, 20.0, 1.0, 0.0, 0.0, 0.93, 0.19, 1.79 ) },
             { RadioClimate.ContinentalTemperate, new ClimateSettings (-0.62, 9.19, 228.9e3, 205.2e3, 143.6e3, 2.68, 7.16, 93.7e3, 186.8e3, 133.5e3, 4.75, 8.12, 93.2e3, 135.9e3, 113.4e3, 1.224, 1.282, 0.92, 0.25, 1.77, 0.93, 0.31, 2.00 ) },
-            { RadioClimate.MaritimeTemperateOverLand, new ClimateSettings (-0.39, 2.86, 141.7e3, 315.9e3, 167.4e3, 6.86, 10.38, 187.8e3, 169.6e3, 108.9e3, 8.58, 13.97, 216.0e3, 152.0e3, 122.7e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
-            { RadioClimate.MaritimeTemperateOverSea, new ClimateSettings (3.15, 857.9, 2222.0e3, 164.8e3, 116.3e3, 8.51, 169.8, 609.8e3, 119.9e3, 106.6e3, 8.43, 8.19, 136.2e3, 188.5e3, 122.9e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
+            { RadioClimate.MaritimeOverLand, new ClimateSettings (-0.39, 2.86, 141.7e3, 315.9e3, 167.4e3, 6.86, 10.38, 187.8e3, 169.6e3, 108.9e3, 8.58, 13.97, 216.0e3, 152.0e3, 122.7e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
+            { RadioClimate.MaritimeOverSea, new ClimateSettings (3.15, 857.9, 2222.0e3, 164.8e3, 116.3e3, 8.51, 169.8, 609.8e3, 119.9e3, 106.6e3, 8.43, 8.19, 136.2e3, 188.5e3, 122.9e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
         };
 
         private VariabilityMode _kdv;
@@ -1041,11 +1041,11 @@ namespace LongleyRice
     {
         Equatorial = 1,
         ContinentalSubtropical = 2,
-        MaritimeTropical = 3,
+        MaritimeSubtropical = 3,
         Desert = 4,
         ContinentalTemperate = 5,
-        MaritimeTemperateOverLand = 6,
-        MaritimeTemperateOverSea = 7,
+        MaritimeOverLand = 6,
+        MaritimeOverSea = 7,
     }
 
     public enum VariabilityMode

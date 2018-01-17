@@ -16,7 +16,7 @@ namespace LongleyRice
         }
     }
 
-    public class Original
+    class Original
     {
         // *************************************
         // C++ routines for this program are taken from
