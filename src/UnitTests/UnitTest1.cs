@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace UnitTests
@@ -25,123 +26,111 @@ namespace UnitTests
         [TestMethod]
         public void TestMethod1()
         {
-            var itm = new IrregularTerrainModel();
-            foreach (var p in GetParameters())
+            var times = new Dictionary<int, Stopwatch>
             {
-                var e = new double[p.elev.Length + 2];
-                e[0] = p.elev.Length - 1;
-                e[1] = p.dist / e[0];
-                Buffer.BlockCopy(p.elev, 0, e, sizeof(double) * 2, sizeof(double) * p.elev.Length);
-                point_to_pointMDH(e, p.tht_m, p.rht_m, p.eps_dielect, p.sgm_conductivity, p.eps_dielect, p.frq_mhz, (int)p.radio_climate, (int)p.pol, p.timepct, p.locpct, p.confpct,
+                {0, new Stopwatch()},
+                {1, new Stopwatch()},
+                {2, new Stopwatch()},
+            };
+
+            var itm = new IrregularTerrainModel();
+            foreach (var p in GetPointToPointModels())
+            {
+                var e = new double[p.Elevations.Length + 2];
+                e[0] = p.Elevations.Length - 1;
+                e[1] = p.Distance / e[0];
+                Buffer.BlockCopy(p.Elevations, 0, e, sizeof(double) * 2, sizeof(double) * p.Elevations.Length);
+                times[0].Start();
+                point_to_pointMDH(e, p.Transmitter.Height, p.Receiver.Height, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency, (int)p.Climate, (int)p.Polarization, p.Variability.Time, p.Variability.Location, p.Variability.Confidence,
                     out var dbloss0, out var propMode0, out var deltaH0, out var errnum0);
+                times[0].Stop();
 
                 itm.UseOriginal = true;
-                itm.PointToPoint(p.elev, p.dist, p.tht_m, p.rht_m, p.eps_dielect, p.sgm_conductivity, p.eps_dielect, p.frq_mhz, p.radio_climate, p.pol, p.timepct, p.locpct, p.confpct,
-                    out var dbloss1, out var propMode1, out var deltaH1, out var errnum1);
+                times[1].Start();
+                itm.PointToPoint(p);
+                times[1].Stop();
 
-                Assert.AreEqual(Math.Round(dbloss0, 10), Math.Round(dbloss1, 10)); // fractional precision variance after 10 decimal places
-                Assert.AreEqual(propMode0, (int)propMode1);
-                Assert.AreEqual(Math.Round(deltaH0, 10), Math.Round(deltaH1, 10)); // fractional precision variance after 10 decimal places
-                Assert.AreEqual(errnum0, errnum1);
+                Assert.AreEqual(Math.Round(dbloss0, 10), Math.Round(p.DbLoss, 10)); // fractional precision variance after 10 decimal places
+                Assert.AreEqual(propMode0, (int)p.PropMode);
+                Assert.AreEqual(Math.Round(deltaH0, 10), Math.Round(p.DeltaH, 10)); // fractional precision variance after 10 decimal places
+                Assert.AreEqual(errnum0, p.ErrorIndicator);
+
+                var dbloss1 = p.DbLoss;
+                var propMode1 = p.PropMode;
+                var deltaH1 = p.DeltaH;
+                var errnum1 = p.ErrorIndicator;
 
                 itm.UseOriginal = false;
-                itm.PointToPoint(p.elev, p.dist, p.tht_m, p.rht_m, p.eps_dielect, p.sgm_conductivity, p.eps_dielect, p.frq_mhz, p.radio_climate, p.pol, p.timepct, p.locpct, p.confpct,
-                    out var dbloss2, out var propMode2, out var deltaH2, out var errnum2);
+                times[2].Start();
+                itm.PointToPoint(p);
+                times[2].Stop();
 
-                Assert.AreEqual(dbloss1, dbloss2);
-                Assert.AreEqual((int)propMode1, (int)propMode2);
-                Assert.AreEqual(deltaH1, deltaH2);
-                Assert.AreEqual(errnum1, errnum2);
+                Assert.AreEqual(dbloss1, p.DbLoss);
+                Assert.AreEqual((int)propMode1, (int)p.PropMode);
+                Assert.AreEqual(deltaH1, p.DeltaH);
+                Assert.AreEqual(errnum1, p.ErrorIndicator);
+            }
 
-                foreach (SiteCriteria SiteCriteria in Enum.GetValues(typeof(SiteCriteria)))
-                {
-                    foreach (VariabilityMode ModVar in Enum.GetValues(typeof(VariabilityMode)))
-                    {
-                        foreach (var deltaH in new[] { 0, 30, 90, 200, 500 })
-                        {
-                            area((int)ModVar, deltaH, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, (int)SiteCriteria,
-                                (int)SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
-                                (int)p.radio_climate, (int)p.pol, p.timepct, p.locpct, p.confpct, out dbloss0,
-                                IntPtr.Zero,
-                                out errnum0);
+            foreach (var p in GetAreaModels())
+            {
+                times[0].Start();
+                area((int)p.Variability.Mode, p.DeltaH, p.Transmitter.Height, p.Receiver.Height, p.Distance, (int)p.Transmitter.SiteCriteria,
+                    (int)p.Receiver.SiteCriteria, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency,
+                    (int)p.Climate, (int)p.Polarization, p.Variability.Time, p.Variability.Location, p.Variability.Confidence, out var dbloss0,
+                    IntPtr.Zero,
+                    out var errnum0);
+                times[0].Stop();
 
-                            itm.UseOriginal = true;
-                            itm.Area(ModVar, deltaH, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, SiteCriteria, SiteCriteria,
-                                p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz, p.radio_climate, p.pol,
-                                p.timepct, p.locpct, p.confpct, out dbloss1, out errnum1);
+                itm.UseOriginal = true;
+                times[1].Start();
+                itm.Area(p);
+                times[1].Stop();
 
-                            Assert.AreEqual(Math.Round(dbloss0, 8), Math.Round(dbloss1, 8));
-                            Assert.AreEqual(errnum0, errnum1);
+                Assert.AreEqual(Math.Round(dbloss0, 8), Math.Round(p.DbLoss, 8));
+                Assert.AreEqual(errnum0, p.ErrorIndicator);
 
-                            itm.UseOriginal = false;
-                            itm.Area(ModVar, deltaH, p.tht_m, p.rht_m, p.elev[1] * p.elev[0] / 1000, SiteCriteria,
-                                SiteCriteria, p.eps_dielect, p.sgm_conductivity, p.eno_ns_surfref, p.frq_mhz,
-                                p.radio_climate, p.pol, p.timepct, p.locpct, p.confpct, out dbloss2, out errnum2);
+                var dbloss1 = p.DbLoss;
+                var errnum1 = p.ErrorIndicator;
 
-                            Assert.AreEqual(dbloss1, dbloss2);
-                            Assert.AreEqual(errnum1, errnum2);
-                        }
-                    }
-                }
+                itm.UseOriginal = false;
+                times[2].Start();
+                itm.Area(p);
+                times[2].Stop();
+
+                Assert.AreEqual(dbloss1, p.DbLoss);
+                Assert.AreEqual(errnum1, p.ErrorIndicator);
             }
         }
 
-        static IEnumerable<Parameters> GetParameters()
+        static IEnumerable<PointToPointModel> GetPointToPointModels()
         {
             var elevations = new double[] { 108, 106, 105, 107, 109 };
-            var eps_dielect = new[] { 15, 4, 25, 81, 81 };
-            var sgm_conductivity = new[] { 0.005, 0.001, 0.02, 0.01, 5 };
 
-            foreach (var ht_m in new[] { 2, 5, 10, 50 })
+            foreach (var height in new[] { 2, 5, 10, 50 })
             {
-                foreach (var frq_mhz in new[] { 50, 100, 500, 915, 1000, 2000, 5000 })
+                foreach (var frequency in new[] { 50, 107.7, 500, 915, 1000, 2400, 5000 })
                 {
-                    foreach (var pct in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
+                    foreach (var percent in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
                     {
-                        foreach (RadioClimate radio_climate in Enum.GetValues(typeof(RadioClimate)))
+                        foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
                         {
-                            var eno_ns_surfref = 301;
-                            switch (radio_climate)
+                            foreach (Polarization polarization in Enum.GetValues(typeof(Polarization)))
                             {
-                                case RadioClimate.Equatorial:
-                                    eno_ns_surfref = 360;
-                                    break;
-                                case RadioClimate.ContinentalSubtropical:
-                                    eno_ns_surfref = 320;
-                                    break;
-                                case RadioClimate.MaritimeSubtropical:
-                                    eno_ns_surfref = 370;
-                                    break;
-                                case RadioClimate.Desert:
-                                    eno_ns_surfref = 280;
-                                    break;
-                                case RadioClimate.MaritimeOverLand:
-                                    eno_ns_surfref = 320;
-                                    break;
-                                case RadioClimate.MaritimeOverSea:
-                                    eno_ns_surfref = 350;
-                                    break;
-                            }
-                            foreach (Polarization pol in Enum.GetValues(typeof(Polarization)))
-                            {
-                                for (var ground = 0; ground < 5; ground++)
+                                foreach (GroundQuality ground in Enum.GetValues(typeof(GroundQuality)))
                                 {
-                                    yield return new Parameters
+                                    var model = new PointToPointModel(elevations, 2000)
                                     {
-                                        confpct = pct,
-                                        elev = elevations,
-                                        dist = 2000,
-                                        eno_ns_surfref = eno_ns_surfref,
-                                        eps_dielect = eps_dielect[ground],
-                                        frq_mhz = frq_mhz,
-                                        locpct = pct,
-                                        pol = pol,
-                                        radio_climate = radio_climate,
-                                        rht_m = ht_m,
-                                        sgm_conductivity = sgm_conductivity[ground],
-                                        tht_m = ht_m,
-                                        timepct = pct
+                                        Climate = climate,
+                                        GroundQuality = ground,
+                                        Frequency = frequency,
+                                        Polarization = polarization
                                     };
+                                    model.Variability.Confidence = percent;
+                                    model.Variability.Location = percent;
+                                    model.Variability.Time = percent;
+                                    model.Transmitter.Height = height;
+                                    model.Receiver.Height = height;
+                                    yield return model;
                                 }
                             }
                         }
@@ -150,21 +139,52 @@ namespace UnitTests
             }
         }
 
-        class Parameters
+        static IEnumerable<AreaModel> GetAreaModels()
         {
-            public double[] elev;
-            public double dist;
-            public double tht_m;
-            public double rht_m;
-            public double eps_dielect;
-            public double sgm_conductivity;
-            public double eno_ns_surfref;
-            public double frq_mhz;
-            public RadioClimate radio_climate;
-            public Polarization pol;
-            public double timepct;
-            public double locpct;
-            public double confpct;
+            foreach (var height in new[] { 2, 5, 10, 50 })
+            {
+                foreach (var frequency in new[] { 50, 107.7, 500, 915, 1000, 2400, 5000 })
+                {
+                    foreach (var percent in new[] { 0.5, 0.9, 0.1 })
+                    {
+                        foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
+                        {
+                            foreach (Polarization polarization in Enum.GetValues(typeof(Polarization)))
+                            {
+                                foreach (TerrainType terrainType in Enum.GetValues(typeof(TerrainType)))
+                                {
+                                    foreach (GroundQuality ground in Enum.GetValues(typeof(GroundQuality)))
+                                    {
+                                        foreach (SiteCriteria siteCriteria in Enum.GetValues(typeof(SiteCriteria)))
+                                        {
+                                            foreach (VariabilityMode variabilityMode in Enum.GetValues(typeof(VariabilityMode)))
+                                            {
+                                                var model = new AreaModel(2000)
+                                                {
+                                                    Climate = climate,
+                                                    GroundQuality = ground,
+                                                    Frequency = frequency,
+                                                    Polarization = polarization,
+                                                    TerrainType = terrainType,
+                                                };
+                                                model.Variability.Mode = variabilityMode;
+                                                model.Variability.Confidence = percent;
+                                                model.Variability.Location = percent;
+                                                model.Variability.Time = percent;
+                                                model.Transmitter.Height = height;
+                                                model.Transmitter.SiteCriteria = siteCriteria;
+                                                model.Receiver.Height = height;
+                                                model.Receiver.SiteCriteria = siteCriteria;
+                                                yield return model;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

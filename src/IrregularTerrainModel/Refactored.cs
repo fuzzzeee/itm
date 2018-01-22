@@ -14,7 +14,8 @@ namespace LongleyRice
             {
                 EndIndex = (int)elevations[0];
                 DeltaDistance = elevations[1];
-                Points = elevations.Skip(2).ToArray();
+                Points = new double[elevations.Length - 2];
+                Buffer.BlockCopy(elevations, sizeof(double) * 2, Points, 0, sizeof(double) * Points.Length);
             }
 
             public Elevations(int length, double deltaDistance)
@@ -1039,31 +1040,70 @@ namespace LongleyRice
 
     public enum RadioClimate
     {
+        /// <summary>
+        /// Congo
+        /// </summary>
         Equatorial = 1,
+        /// <summary>
+        /// Sudan
+        /// </summary>
         ContinentalSubtropical = 2,
+        /// <summary>
+        /// West Coast of Africa
+        /// </summary>
         MaritimeSubtropical = 3,
+        /// <summary>
+        /// Sahara
+        /// </summary>
         Desert = 4,
+        /// <summary>
+        /// Use for Avg. Atmospheric Conditions
+        /// </summary>
         ContinentalTemperate = 5,
+        /// <summary>
+        /// UK and Continental West Coast
+        /// </summary>
         MaritimeOverLand = 6,
         MaritimeOverSea = 7,
     }
 
+    public enum GroundQuality
+    {
+        Average,
+        Poor,
+        Good,
+        FreshWater,
+        SeaWater,
+    }
+
+    public enum TerrainType
+    {
+        Flat = 0,
+        Plains = 30,
+        /// <summary>
+        /// Use for Avg. Terrain
+        /// </summary>
+        Hills = 90,
+        Mountains = 200,
+        RuggedMountains = 500,
+    }
+    
     public enum VariabilityMode
     {
         /// <summary>
-        /// pctConf is "Time/Situation/Location", pctTime, pctLoc not used
+        /// Confidence is Time/Situation/Location, Time, Location not used
         /// </summary>
         Single = 0,
         /// <summary>
-        /// pctTime is "Situation/Location", pctConf is "Confidence", pctLoc not used
+        /// Time is Situation/Location, Confidence is Confidence, Location not used
         /// </summary>
         Individual = 1,
         /// <summary>
-        /// pctTime is "Time/Locations (Reliability)", pctConf is "Confidence", pctLoc not used
+        /// Time is Time/Location (Reliability), Confidence is Confidence, Location not used
         /// </summary>
         Mobile = 2,
         /// <summary>
-        /// pctTime is "Time", pctLoc is "Location", pctConf is "Confidence"
+        /// Time is Time, Location is Location, Confidence is Confidence
         /// </summary>
         Broadcast = 3,
     }
