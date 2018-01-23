@@ -48,34 +48,121 @@ namespace LongleyRice
         // ReSharper disable once InconsistentNaming
         private class prop_type
         {
+            /// <summary>
+            /// Reference attenuation
+            /// </summary>
             public double aref;
+            /// <summary>
+            /// Distance
+            /// </summary>
             public double dist;
+            /// <summary>
+            /// Antenna structural heights
+            /// </summary>
             public readonly double[] hg = new double[2];
+            /// <summary>
+            /// Wave number (radio frequency)
+            /// </summary>
             public double wn;
+            /// <summary>
+            /// Terrain irregularity parameter
+            /// </summary>
             public double dh;
+            /// <summary>
+            /// Surface refractivity
+            /// </summary>
             public double ens;
+            /// <summary>
+            /// Earth's effective curvature
+            /// </summary>
             public double gme;
+            /// <summary>
+            /// Surface transfer impedance of the ground
+            /// </summary>
             public Complex zgnd;
+            /// <summary>
+            /// Antenna effective heights
+            /// </summary>
             public readonly double[] he = new double[2];
+            /// <summary>
+            /// Horizon distances
+            /// </summary>
             public readonly double[] dl = new double[2];
+            /// <summary>
+            /// Horizon elevation angles
+            /// </summary>
             public readonly double[] the = new double[2];
+            /// <summary>
+            /// Error indicator
+            /// </summary>
             public int kwx;
+            /// <summary>
+            /// Controlling mode
+            /// </summary>
             public ControlFlow mdp;
+            /// <summary>
+            /// Standard deviation of situation variability (confidence)
+            /// </summary>
             public double sgc;
+            /// <summary>
+            /// A control switch
+            /// </summary>
             public ControlSwitch lvar;
+            /// <summary>
+            /// Desired mode of variability
+            /// </summary>
             public VariabilityMode mdvar;
+            /// <summary>
+            /// Climate indicator
+            /// </summary>
             public RadioClimate klim;
+            /// <summary>
+            /// Line-of-sight distance
+            /// </summary>
             public double dlsa;
+            /// <summary>
+            /// Scatter distance
+            /// </summary>
             public double dx;
+            /// <summary>
+            /// Line-of-sight coefficient
+            /// </summary>
             public double ael;
+            /// <summary>
+            /// Line-of-sight coefficient
+            /// </summary>
             public double ak1;
+            /// <summary>
+            /// Line-of-sight coefficient
+            /// </summary>
             public double ak2;
+            /// <summary>
+            /// Diffraction coefficient
+            /// </summary>
             public double aed;
+            /// <summary>
+            /// Diffraction coefficient
+            /// </summary>
             public double emd;
+            /// <summary>
+            /// Scatter coefficient
+            /// </summary>
             public double aes;
+            /// <summary>
+            /// Scatter coefficient
+            /// </summary>
             public double ems;
+            /// <summary>
+            /// Smooth earth horizon distances
+            /// </summary>
             public readonly double[] dls = new double[2];
+            /// <summary>
+            /// Total horizon distance
+            /// </summary>
             public double dla;
+            /// <summary>
+            /// Total bending angle
+            /// </summary>
             public double tha;
         };
 
