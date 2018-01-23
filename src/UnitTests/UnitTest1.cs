@@ -104,33 +104,34 @@ namespace UnitTests
 
         static IEnumerable<PointToPointModel> GetPointToPointModels()
         {
-            var elevations = new double[] { 108, 106, 105, 107, 109 };
-
-            foreach (var height in new[] { 2, 5, 10, 50 })
+            foreach (var elevations in GetElevations())
             {
-                foreach (var frequency in new[] { 50, 107.7, 500, 915, 1000, 2400, 5000 })
+                foreach (var height in new[] {2, 5, 10, 50})
                 {
-                    foreach (var percent in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
+                    foreach (var frequency in new[] {50, 107.7, 500, 915, 1000, 2400, 5000})
                     {
-                        foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
+                        foreach (var percent in new[] {0.01, 0.1, 0.5, 0.9, 0.99})
                         {
-                            foreach (Polarization polarization in Enum.GetValues(typeof(Polarization)))
+                            foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
                             {
-                                foreach (GroundQuality ground in Enum.GetValues(typeof(GroundQuality)))
+                                foreach (Polarization polarization in Enum.GetValues(typeof(Polarization)))
                                 {
-                                    var model = new PointToPointModel(elevations, 2000)
+                                    foreach (GroundQuality ground in Enum.GetValues(typeof(GroundQuality)))
                                     {
-                                        Climate = climate,
-                                        GroundQuality = ground,
-                                        Frequency = frequency,
-                                        Polarization = polarization
-                                    };
-                                    model.Variability.Confidence = percent;
-                                    model.Variability.Location = percent;
-                                    model.Variability.Time = percent;
-                                    model.Transmitter.Height = height;
-                                    model.Receiver.Height = height;
-                                    yield return model;
+                                        var model = new PointToPointModel(elevations, 2000)
+                                        {
+                                            Climate = climate,
+                                            GroundQuality = ground,
+                                            Frequency = frequency,
+                                            Polarization = polarization
+                                        };
+                                        model.Variability.Confidence = percent;
+                                        model.Variability.Location = percent;
+                                        model.Variability.Time = percent;
+                                        model.Transmitter.Height = height;
+                                        model.Receiver.Height = height;
+                                        yield return model;
+                                    }
                                 }
                             }
                         }
@@ -185,6 +186,15 @@ namespace UnitTests
                     }
                 }
             }
+        }
+
+        static IEnumerable<double[]> GetElevations()
+        {
+            yield return new double[] { 100, 90, 90, 90, 100 }; // simple line of sight
+            yield return new double[] { 100, 90, 111, 90, 100 }; // single horizon
+            yield return new double[] { 100, 90, 111, 90, 111, 90, 100 }; // double horizon
+            yield return new double[] { 100, 90, 113, 90, 113, 90, 100 }; // double horizon
+            yield return new double[] { 100, 90, 120, 120, 120, 90, 100 }; // blocked
         }
     }
 }
