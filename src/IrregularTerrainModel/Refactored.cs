@@ -101,13 +101,13 @@ namespace LongleyRice
             /// </summary>
             public ControlFlow mdp;
             /// <summary>
-            /// Standard deviation of situation variability (confidence)
+            /// Standard deviation of situation variability (with what confidence will a threshold signal level be exceeded)
             /// </summary>
             public double sgc;
             /// <summary>
             /// A control switch
             /// </summary>
-            public ControlSwitch lvar;
+            public Changes lvar;
             /// <summary>
             /// Desired mode of variability
             /// </summary>
@@ -164,6 +164,22 @@ namespace LongleyRice
             /// Total bending angle
             /// </summary>
             public double tha;
+
+            public double ad, rr, etq, h0s;
+
+            public double dexa, de, vmd, vs0, sgl, sgtm, sgtp, sgtd, tgtd, gm, gp;
+
+            public double dmin, xae;
+
+            public double wls;
+
+            public ClimateSettings cs;
+
+            public bool w1;
+
+            public double wd1, xd1, afo, qk, aht, xht;
+
+            public bool wlos, wscat;
         };
 
         /// <summary>
@@ -180,6 +196,11 @@ namespace LongleyRice
                 return 0;
         }
 
+        /// <summary>
+        /// The attenuation due to a single knife edge - the Fresnel integral (in decibels) as a function of <paramref name="v2"/>
+        /// </summary>
+        /// <param name="v2"></param>
+        /// <returns></returns>
         // ReSharper disable once InconsistentNaming
         private static double aknfe(double v2)
         {
@@ -189,6 +210,12 @@ namespace LongleyRice
                 return 12.953 + 4.343 * Log(v2);
         }
 
+        /// <summary>
+        /// The height-gain over a smooth spherical earth - to be used in the "three radii" method.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="pk"></param>
+        /// <returns></returns>
         // ReSharper disable once InconsistentNaming
         private static double fht(double x, double pk)
         {
@@ -224,6 +251,12 @@ namespace LongleyRice
         // ReSharper disable once InconsistentNaming
         private static readonly int[] _h0f_b = { 24, 45, 68, 80, 105 };
 
+        /// <summary>
+        /// H01 function for scatter fields
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="et"></param>
+        /// <returns></returns>
         // ReSharper disable once InconsistentNaming
         private static double h0f(double r, double et)
         {
@@ -256,6 +289,12 @@ namespace LongleyRice
         private static readonly double[] _ahd_b = { 0.332e-3, 0.212e-3, 0.157e-3 };
         // ReSharper disable once InconsistentNaming
         private static readonly double[] _ahd_c = { -4.343, -1.086, 2.171 };
+
+        /// <summary>
+        /// The F(0d) function for scatter fields
+        /// </summary>
+        /// <param name="td"></param>
+        /// <returns></returns>
         // ReSharper disable once InconsistentNaming
         private static double ahd(double td)
         {
@@ -272,29 +311,37 @@ namespace LongleyRice
         private void init_adiff(prop_type prop)
         {
             var q = prop.hg[0] * prop.hg[1];
-            _qk = prop.he[0] * prop.he[1] - q;
+            prop.qk = prop.he[0] * prop.he[1] - q;
             if (prop.mdp == ControlFlow.PointToPoint)
                 q += 10;
-            _wd1 = Sqrt(1 + _qk / q);
-            _xd1 = prop.dla + prop.tha / prop.gme;
+            prop.wd1 = Sqrt(1 + prop.qk / q);
+            prop.xd1 = prop.dla + prop.tha / prop.gme;
             q = (1 - 0.8 * Exp(-prop.dlsa / 50000)) * prop.dh;
             q *= 0.78 * Exp(-Pow(q / 16.0, 0.25));
-            _afo = Min(15, 2.171 * Log(1 + 4.77e-4 * prop.hg[0] * prop.hg[1] * prop.wn * q));
-            _qk = 1 / Complex.Abs(prop.zgnd);
-            _aht = 20;
-            _xht = 0;
+            prop.afo = Min(15, 2.171 * Log(1 + 4.77e-4 * prop.hg[0] * prop.hg[1] * prop.wn * q));
+            prop.qk = 1 / Complex.Abs(prop.zgnd);
+            prop.aht = 20;
+            prop.xht = 0;
             for (var j = 0; j < 2; j++)
             {
                 var a = 0.5 * Pow(prop.dl[j], 2) / prop.he[j];
                 var wa = Pow(a * prop.wn, THIRD);
-                var pk = _qk / wa;
+                var pk = prop.qk / wa;
                 q = (1.607 - pk) * 151 * wa * prop.dl[j] / a;
-                _xht += q;
-                _aht += fht(q, pk);
+                prop.xht += q;
+                prop.aht += fht(q, pk);
             }
         }
 
-        private double _wd1, _xd1, _afo, _qk, _aht, _xht;
+        /// <summary>
+        /// Finds the "diffraction attenuation" at the distance <paramref name="d"/>
+        /// </summary>
+        /// <remarks>
+        /// It uses a convex combination of smooth earth diffraction and double knife-edge diffraction
+        /// </remarks>
+        /// <param name="d"></param>
+        /// <param name="prop"></param>
+        /// <returns></returns>
         // ReSharper disable once InconsistentNaming
         private double adiff(double d, prop_type prop)
         {
@@ -304,35 +351,40 @@ namespace LongleyRice
             var adiffv = aknfe(q * prop.dl[0] / (ds + prop.dl[0])) + aknfe(q * prop.dl[1] / (ds + prop.dl[1]));
             var a = ds / th;
             var wa = Pow(a * prop.wn, THIRD);
-            var pk = _qk / wa;
-            q = (1.607 - pk) * 151 * wa * th + _xht;
-            var ar = 0.05751 * q - 4.343 * Log(q) - _aht;
-            q = (_wd1 + _xd1 / d) * Min((1 - 0.8 * Exp(-d / 50000)) * prop.dh * prop.wn, 6283.2);
+            var pk = prop.qk / wa;
+            q = (1.607 - pk) * 151 * wa * th + prop.xht;
+            var ar = 0.05751 * q - 4.343 * Log(q) - prop.aht;
+            q = (prop.wd1 + prop.xd1 / d) * Min((1 - 0.8 * Exp(-d / 50000)) * prop.dh * prop.wn, 6283.2);
             var wd = 25.1 / (25.1 + Sqrt(q));
-            return ar * wd + (1 - wd) * adiffv + _afo;
+            return ar * wd + (1 - wd) * adiffv + prop.afo;
         }
 
         private void init_ascat(prop_type prop)
         {
-            _ad = prop.dl[0] - prop.dl[1];
-            _rr = prop.he[1] / prop.he[0];
-            if (_ad < 0)
+            prop.ad = prop.dl[0] - prop.dl[1];
+            prop.rr = prop.he[1] / prop.he[0];
+            if (prop.ad < 0)
             {
-                _ad = -_ad;
-                _rr = 1 / _rr;
+                prop.ad = -prop.ad;
+                prop.rr = 1 / prop.rr;
             }
-            _etq = (5.67e-6 * prop.ens - 2.32e-3) * prop.ens + 0.031;
-            _h0s = -15;
+            prop.etq = (5.67e-6 * prop.ens - 2.32e-3) * prop.ens + 0.031;
+            prop.h0s = -15;
         }
 
-        private double _ad, _rr, _etq, _h0s;
+        /// <summary>
+        /// Finds the "scatter attenuation" at the distance <paramref name="d"/>. It uses an approximation to the methods of NBS TN101 with checks for inadmissable situations
+        /// </summary>
+        /// <param name="d"></param>
+        /// <param name="prop"></param>
+        /// <returns></returns>
         // ReSharper disable once InconsistentNaming
         private double ascat(double d, prop_type prop)
         {
             double th;
             double h0;
-            if (_h0s > 15)
-                h0 = _h0s;
+            if (prop.h0s > 15)
+                h0 = prop.h0s;
             else
             {
                 th = prop.the[0] + prop.the[1] + d * prop.gme;
@@ -341,22 +393,22 @@ namespace LongleyRice
                 r2 *= prop.he[1];
                 if (r1 < 0.2 && r2 < 0.2)
                     return 1001;  // <==== early return
-                var ss = (d - _ad) / (d + _ad);
-                var q = _rr / ss;
+                var ss = (d - prop.ad) / (d + prop.ad);
+                var q = prop.rr / ss;
                 ss = Max(0.1, ss);
                 q = Min(Max(0.1, q), 10);
-                var z0 = (d - _ad) * (d + _ad) * th * 0.25 / d;
-                var et = (_etq * Exp(-Pow(Min(1.7, z0 / 8000.0), 6)) + 1) * z0 / 1.7556e3;
+                var z0 = (d - prop.ad) * (d + prop.ad) * th * 0.25 / d;
+                var et = (prop.etq * Exp(-Pow(Min(1.7, z0 / 8000.0), 6)) + 1) * z0 / 1.7556e3;
                 var ett = Max(et, 1);
                 h0 = (h0f(r1, ett) + h0f(r2, ett)) * 0.5;
                 h0 += Min(h0, (1.38 - Log(ett)) * Log(ss) * Log(q) * 0.49);
                 h0 = Dim(h0, 0);
                 if (et < 1)
                     h0 = et * h0 + (1 - et) * 4.343 * Log(Pow((1 + 1.4142 / r1) * (1 + 1.4142 / r2), 2) * (r1 + r2) / (r1 + r2 + 2.8284));
-                if (h0 > 15 && _h0s >= 0)
-                    h0 = _h0s;
+                if (h0 > 15 && prop.h0s >= 0)
+                    h0 = prop.h0s;
             }
-            _h0s = h0;
+            prop.h0s = h0;
             th = prop.tha + d * prop.gme;
             return ahd(th * d) + 4.343 * Log(47.7 * prop.wn * Pow(th, 4)) - 0.1 * (prop.ens - 301) * Exp(-th * d / 40000.0) + h0;
         }
@@ -405,10 +457,15 @@ namespace LongleyRice
 
         private void init_alos(prop_type prop)
         {
-            _wls = 0.021 / (0.021 + prop.wn * prop.dh / Max(10000, prop.dlsa));
+            prop.wls = 0.021 / (0.021 + prop.wn * prop.dh / Max(10000, prop.dlsa));
         }
 
-        private double _wls;
+        /// <summary>
+        /// Finds the "line-of-sight" attenuation at the distance <paramref name="d"/> It uses a convex combination of plane earth fields and diffracted fields
+        /// </summary>
+        /// <param name="d"></param>
+        /// <param name="prop"></param>
+        /// <returns></returns>
         // ReSharper disable once InconsistentNaming
         private double alos(double d, prop_type prop)
         {
@@ -424,7 +481,7 @@ namespace LongleyRice
             q = prop.wn * prop.he[0] * prop.he[1] * 2 / d;
             if (q > 1.57)
                 q = 3.14 - 2.4649 / q;
-            return (-4.343 * Log(abq_alos(new Complex(Cos(q), -Sin(q)) + r)) - alosv) * _wls + alosv;
+            return (-4.343 * Log(abq_alos(new Complex(Cos(q), -Sin(q)) + r)) - alosv) * prop.wls + alosv;
         }
 
 
@@ -452,11 +509,14 @@ namespace LongleyRice
             prop.mdp = ControlFlow.AreaBegin;
             prop.mdvar = mdvarx;
             prop.klim = klimx;
-            prop.lvar = ControlSwitch.New;
+            prop.lvar = Changes.All;
         }
 
-        private bool _wlos, _wscat;
-        private double _dmin, _xae;
+        /// <summary>
+        /// The Longley-Rice propagation program. This is the basic program; it returns the reference attenuation
+        /// </summary>
+        /// <param name="d"></param>
+        /// <param name="prop"></param>
         // ReSharper disable once InconsistentNaming
         private void lrprop(double d, prop_type prop)  // PaulM_lrprop
         {
@@ -467,8 +527,8 @@ namespace LongleyRice
                 prop.dlsa = prop.dls[0] + prop.dls[1];
                 prop.dla = prop.dl[0] + prop.dl[1];
                 prop.tha = Max(prop.the[0] + prop.the[1], -prop.dla * prop.gme);
-                _wlos = false;
-                _wscat = false;
+                prop.wlos = false;
+                prop.wscat = false;
                 if (prop.wn < 0.838 || prop.wn > 210)
                 {
                     prop.kwx = Max(prop.kwx, 1);
@@ -496,11 +556,11 @@ namespace LongleyRice
                     {
                         prop.kwx = 4;
                     }
-                _dmin = Abs(prop.he[0] - prop.he[1]) / 200e-3;
+                prop.dmin = Abs(prop.he[0] - prop.he[1]) / 200e-3;
                 init_adiff(prop);
-                _xae = Pow(prop.wn * Pow(prop.gme, 2), -THIRD);
-                var d3 = Max(prop.dlsa, 1.3787 * _xae + prop.dla);
-                var d4 = d3 + 2.7574 * _xae;
+                prop.xae = Pow(prop.wn * Pow(prop.gme, 2), -THIRD);
+                var d3 = Max(prop.dlsa, 1.3787 * prop.xae + prop.dla);
+                var d4 = d3 + 2.7574 * prop.xae;
                 var a3 = adiff(d3, prop);
                 var a4 = adiff(d4, prop);
                 prop.emd = (a4 - a3) / (d4 - d3);
@@ -517,7 +577,7 @@ namespace LongleyRice
                 {
                     prop.kwx = Max(prop.kwx, 1);
                 }
-                if (prop.dist < _dmin)
+                if (prop.dist < prop.dmin)
                 {
                     prop.kwx = Max(prop.kwx, 3);
                 }
@@ -528,7 +588,7 @@ namespace LongleyRice
             }
             if (prop.dist < prop.dlsa)
             {
-                if (!_wlos)
+                if (!prop.wlos)
                 {
                     init_alos(prop);
                     var d2 = prop.dlsa;
@@ -572,14 +632,14 @@ namespace LongleyRice
                             prop.ak1 = prop.emd;
                     }
                     prop.ael = a2 - prop.ak1 * d2 - prop.ak2 * Log(d2);
-                    _wlos = true;
+                    prop.wlos = true;
                 }
                 if (prop.dist > 0)
                     prop.aref = prop.ael + prop.ak1 * prop.dist + prop.ak2 * Log(prop.dist);
             }
             if (prop.dist <= 0 || prop.dist >= prop.dlsa)
             {
-                if (!_wscat)
+                if (!prop.wscat)
                 {
                     init_ascat(prop);
                     var d5 = prop.dla + 200000;
@@ -589,7 +649,7 @@ namespace LongleyRice
                     if (a5 < 1000)
                     {
                         prop.ems = (a6 - a5) / 200000.0;
-                        prop.dx = Max(prop.dlsa, Max(prop.dla + 0.3 * _xae * Log(47.7 * prop.wn), (a5 - prop.aed - prop.ems * d5) / (prop.emd - prop.ems)));
+                        prop.dx = Max(prop.dlsa, Max(prop.dla + 0.3 * prop.xae * Log(47.7 * prop.wn), (a5 - prop.aed - prop.ems * d5) / (prop.emd - prop.ems)));
                         prop.aes = (prop.emd - prop.ems) * prop.dx + prop.aed;
                     }
                     else
@@ -598,7 +658,7 @@ namespace LongleyRice
                         prop.aes = prop.aed;
                         prop.dx = 10000000;
                     }
-                    _wscat = true;
+                    prop.wscat = true;
                 }
                 if (prop.dist > prop.dx)
                     prop.aref = prop.aes + prop.ems * prop.dist;
@@ -678,56 +738,54 @@ namespace LongleyRice
             { RadioClimate.MaritimeOverSea, new ClimateSettings (3.15, 857.9, 2222.0e3, 164.8e3, 116.3e3, 8.51, 169.8, 609.8e3, 119.9e3, 106.6e3, 8.43, 8.19, 136.2e3, 188.5e3, 122.9e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
         };
 
-        private VariabilityMode _kdv;
-        private double _dexa, _de, _vmd, _vs0, _sgl, _sgtm, _sgtp, _sgtd, _tgtd, _gm, _gp;
-        private ClimateSettings _cs;
-
-        private bool _w1;
         // ReSharper disable once InconsistentNaming
         private double avar(double zzt, double zzl, double zzc, prop_type prop)
         {
             const double rt = 7.8, rl = 24.0;
             double sgt, yr;
 
-            if (prop.lvar > ControlSwitch.Complete)
+            if (prop.lvar > Changes.None)
             {
                 double q;
                 switch (prop.lvar)
                 {
                     default:
-                        _cs = _climateSettings[prop.klim];
-                        _kdv = prop.mdvar;
+                        prop.cs = _climateSettings[prop.klim];
+						goto case Changes.VariabilityMode;
+                    case Changes.VariabilityMode:
+						goto case Changes.Frequency;
+                    case Changes.Frequency:
                         q = Log(0.133 * prop.wn);
-                        _gm = _cs.cfm1 + _cs.cfm2 / (Pow(_cs.cfm3 * q, 2) + 1);
-                        _gp = _cs.cfp1 + _cs.cfp2 / (Pow(_cs.cfp3 * q, 2) + 1);
-                        _dexa = Sqrt(18e6 * prop.he[0]) + Sqrt(18e6 * prop.he[1]) + Pow(575.7e12 / prop.wn, THIRD);
-                        goto case ControlSwitch.InProgress;
-                    case ControlSwitch.InProgress:
-                        if (prop.dist < _dexa)
-                            _de = 130000 * prop.dist / _dexa;
+                        prop.gm = prop.cs.cfm1 + prop.cs.cfm2 / (Pow(prop.cs.cfm3 * q, 2) + 1);
+                        prop.gp = prop.cs.cfp1 + prop.cs.cfp2 / (Pow(prop.cs.cfp3 * q, 2) + 1);
+                        prop.dexa = Sqrt(18e6 * prop.he[0]) + Sqrt(18e6 * prop.he[1]) + Pow(575.7e12 / prop.wn, THIRD);
+                        goto case Changes.Distance;
+                    case Changes.Distance:
+                        if (prop.dist < prop.dexa)
+                            prop.de = 130000 * prop.dist / prop.dexa;
                         else
-                            _de = 130000 + prop.dist - _dexa;
+                            prop.de = 130000 + prop.dist - prop.dexa;
                         break;
                 }
-                _vmd = curve(_cs.cv1, _cs.cv2, _cs.yv1, _cs.yv2, _cs.yv3, _de);
-                _sgtm = curve(_cs.csm1, _cs.csm2, _cs.ysm1, _cs.ysm2, _cs.ysm3, _de) * _gm;
-                _sgtp = curve(_cs.csp1, _cs.csp2, _cs.ysp1, _cs.ysp2, _cs.ysp3, _de) * _gp;
-                _sgtd = _sgtp * _cs.csd1;
-                _tgtd = (_sgtp - _sgtd) * _cs.zd;
-                if (_w1)
-                    _sgl = 0;
+                prop.vmd = curve(prop.cs.cv1, prop.cs.cv2, prop.cs.yv1, prop.cs.yv2, prop.cs.yv3, prop.de);
+                prop.sgtm = curve(prop.cs.csm1, prop.cs.csm2, prop.cs.ysm1, prop.cs.ysm2, prop.cs.ysm3, prop.de) * prop.gm;
+                prop.sgtp = curve(prop.cs.csp1, prop.cs.csp2, prop.cs.ysp1, prop.cs.ysp2, prop.cs.ysp3, prop.de) * prop.gp;
+                prop.sgtd = prop.sgtp * prop.cs.csd1;
+                prop.tgtd = (prop.sgtp - prop.sgtd) * prop.cs.zd;
+                if (prop.w1)
+                    prop.sgl = 0;
                 else
                 {
                     q = (1 - 0.8 * Exp(-prop.dist / 50000.0)) * prop.dh * prop.wn;
-                    _sgl = 10 * q / (q + 13);
+                    prop.sgl = 10 * q / (q + 13);
                 }
-                _vs0 = Pow(5 + 3 * Exp(-_de / 100000.0), 2);
-                prop.lvar = ControlSwitch.Complete;
+                prop.vs0 = Pow(5 + 3 * Exp(-prop.de / 100000.0), 2);
+                prop.lvar = Changes.None;
             }
             var zt = zzt;
             var zl = zzl;
             var zc = zzc;
-            switch (_kdv)
+            switch (prop.mdvar)
             {
                 case VariabilityMode.Single:
                     zt = zc;
@@ -745,32 +803,32 @@ namespace LongleyRice
                 prop.kwx = Max(prop.kwx, 1);
             }
             if (zt < 0)
-                sgt = _sgtm;
-            else if (zt <= _cs.zd)
-                sgt = _sgtp;
+                sgt = prop.sgtm;
+            else if (zt <= prop.cs.zd)
+                sgt = prop.sgtp;
             else
-                sgt = _sgtd + _tgtd / zt;
-            var vs = _vs0 + Pow(sgt * zt, 2) / (rt + zc * zc) + Pow(_sgl * zl, 2) / (rl + zc * zc);
-            switch (_kdv)
+                sgt = prop.sgtd + prop.tgtd / zt;
+            var vs = prop.vs0 + Pow(sgt * zt, 2) / (rt + zc * zc) + Pow(prop.sgl * zl, 2) / (rl + zc * zc);
+            switch (prop.mdvar)
             {
                 case VariabilityMode.Single:
                     yr = 0;
-                    prop.sgc = Sqrt(sgt * sgt + _sgl * _sgl + vs);
+                    prop.sgc = Sqrt(sgt * sgt + prop.sgl * prop.sgl + vs);
                     break;
                 case VariabilityMode.Individual:
                     yr = sgt * zt;
-                    prop.sgc = Sqrt(_sgl * _sgl + vs);
+                    prop.sgc = Sqrt(prop.sgl * prop.sgl + vs);
                     break;
                 case VariabilityMode.Mobile:
-                    yr = Sqrt(sgt * sgt + _sgl * _sgl) * zt;
+                    yr = Sqrt(sgt * sgt + prop.sgl * prop.sgl) * zt;
                     prop.sgc = Sqrt(vs);
                     break;
                 default:
-                    yr = sgt * zt + _sgl * zl;
+                    yr = sgt * zt + prop.sgl * zl;
                     prop.sgc = Sqrt(vs);
                     break;
             }
-            var avarv = prop.aref - _vmd - yr - prop.sgc * zc;
+            var avarv = prop.aref - prop.vmd - yr - prop.sgc * zc;
             if (avarv < 0)
                 avarv = avarv * (29 - avarv) / (29 - 10 * avarv);
             return avarv;
@@ -994,7 +1052,7 @@ namespace LongleyRice
             prop.mdp = ControlFlow.PointToPoint;
             prop.mdvar = mdvarx;
             prop.klim = klimx;
-            prop.lvar = ControlSwitch.New;
+            prop.lvar = Changes.All;
             lrprop(0, prop);
         }
 
@@ -1021,9 +1079,9 @@ namespace LongleyRice
             prop.hg[0] = tht_m;
             prop.hg[1] = rht_m;
             prop.klim = radio_climate;
-            prop.lvar = ControlSwitch.New;
+            prop.lvar = Changes.All;
             prop.mdp = ControlFlow.PointToPoint;
-            _w1 = true; // possible bugfix: original embedded this value in mdvar
+            prop.w1 = true; // possible bugfix: original embedded this value in mdvar
             prop.mdvar = VariabilityMode.Broadcast; // bugfix: original used 'mobile'
 
             var e = new Elevations(elev);
@@ -1088,8 +1146,8 @@ namespace LongleyRice
             qlrps(frq_mhz, 0, eno_ns_surfref, pol, eps_dielect, sgm_conductivity, prop);
             var kst = new[] { TSiteCriteria, RSiteCriteria };
             qlra(kst, prop.klim, ModVar, prop);
-            if (prop.lvar < ControlSwitch.InProgress)
-                prop.lvar = ControlSwitch.InProgress;
+            if (prop.lvar < Changes.Distance)
+                prop.lvar = Changes.Distance;
             lrprop(dist_km * 1000, prop);
             var fs = 32.45 + 20 * Log10(frq_mhz) + 20 * Log10(prop.dist / 1000.0);
             var xlb = fs + avar(qerfi(pctTime), qerfi(pctLoc), qerfi(pctConf), prop);
@@ -1104,11 +1162,14 @@ namespace LongleyRice
             AreaBegin = 1,
         }
 
-        private enum ControlSwitch
+        private enum Changes
         {
-            Complete = 0,
-            InProgress = 1,
-            New = 5,
+            None = 0,
+            Distance = 1,
+            AntennaHeight = 2,
+            Frequency = 3,
+            VariabilityMode = 4,
+            All = 5,
         }
     }
 
