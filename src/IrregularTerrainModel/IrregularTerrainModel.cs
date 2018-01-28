@@ -143,6 +143,9 @@ namespace LongleyRice
             {GroundQuality.SeaWater, 81},
         };
 
+        /// <summary>
+        /// Specifies the ground quality. This can be used instead of <see cref="GroundConductivity"/> and <see cref="GroundDielectric"/>
+        /// </summary>
         public GroundQuality GroundQuality
         {
             get => _groundQuality ?? _defaultGroundQuality;
