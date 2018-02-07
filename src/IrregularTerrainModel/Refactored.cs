@@ -749,16 +749,18 @@ namespace LongleyRice
                 double q;
                 switch (prop.lvar)
                 {
-                    default:
+                    case Changes.All:
                         prop.cs = _climateSettings[prop.klim];
-						goto case Changes.VariabilityMode;
+                        goto case Changes.VariabilityMode;
                     case Changes.VariabilityMode:
-						goto case Changes.Frequency;
+                        goto case Changes.Frequency;
                     case Changes.Frequency:
                         q = Log(0.133 * prop.wn);
                         prop.gm = prop.cs.cfm1 + prop.cs.cfm2 / (Pow(prop.cs.cfm3 * q, 2) + 1);
                         prop.gp = prop.cs.cfp1 + prop.cs.cfp2 / (Pow(prop.cs.cfp3 * q, 2) + 1);
-                        prop.dexa = Sqrt(18e6 * prop.he[0]) + Sqrt(18e6 * prop.he[1]) + Pow(575.7e12 / prop.wn, THIRD);
+                        goto case Changes.AntennaHeight;
+                    case Changes.AntennaHeight:
+                        prop.dexa = Sqrt(18000000 * prop.he[0]) + Sqrt(18000000 * prop.he[1]) + Pow(575.7e12 / prop.wn, THIRD);
                         goto case Changes.Distance;
                     case Changes.Distance:
                         if (prop.dist < prop.dexa)
@@ -1235,7 +1237,7 @@ namespace LongleyRice
         Mountains = 200,
         RuggedMountains = 500,
     }
-    
+
     public enum VariabilityMode
     {
         /// <summary>

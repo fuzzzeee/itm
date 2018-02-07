@@ -106,11 +106,11 @@ namespace UnitTests
         {
             foreach (var elevations in GetElevations())
             {
-                foreach (var height in new[] {2, 5, 10, 50})
+                foreach (var height in new[] { 2, 5, 10, 50 })
                 {
-                    foreach (var frequency in new[] {50, 107.7, 500, 915, 1000, 2400, 5000})
+                    foreach (var frequency in new[] { 50, 107.7, 500, 915, 1000, 2400, 5000 })
                     {
-                        foreach (var percent in new[] {0.01, 0.1, 0.5, 0.9, 0.99})
+                        foreach (var percent in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
                         {
                             foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
                             {
@@ -125,11 +125,11 @@ namespace UnitTests
                                             Frequency = frequency,
                                             Polarization = polarization
                                         };
-                                        model.Variability.Confidence = percent;
+                                        model.Variability.Confidence = Math.Max(0.01, percent * 0.9);
                                         model.Variability.Location = percent;
-                                        model.Variability.Time = percent;
+                                        model.Variability.Time = Math.Max(0.01, percent * 0.8);
                                         model.Transmitter.Height = height;
-                                        model.Receiver.Height = height;
+                                        model.Receiver.Height = height * 0.8;
                                         yield return model;
                                     }
                                 }
