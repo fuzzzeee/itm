@@ -679,53 +679,12 @@ namespace LongleyRice
                 double xsm1, double xsm2, double xsm3, double bsp1, double bsp2, double xsp1, double xsp2, double xsp3,
                 double bsd1, double bzd1, double bfm1, double bfm2, double bfm3, double bfp1, double bfp2, double bfp3)
             {
-                cv1 = bv1;
-                cv2 = bv2;
-                yv1 = xv1;
-                yv2 = xv2;
-                yv3 = xv3;
-                csm1 = bsm1;
-                csm2 = bsm2;
-                ysm1 = xsm1;
-                ysm2 = xsm2;
-                ysm3 = xsm3;
-                csp1 = bsp1;
-                csp2 = bsp2;
-                ysp1 = xsp1;
-                ysp2 = xsp2;
-                ysp3 = xsp3;
-                csd1 = bsd1;
-                zd = bzd1;
-                cfm1 = bfm1;
-                cfm2 = bfm2;
-                cfm3 = bfm3;
-                cfp1 = bfp1;
-                cfp2 = bfp2;
-                cfp3 = bfp3;
+                cv1 = bv1; cv2 = bv2; yv1 = xv1; yv2 = xv2; yv3 = xv3; csm1 = bsm1; csm2 = bsm2; ysm1 = xsm1; ysm2 = xsm2;
+                ysm3 = xsm3; csp1 = bsp1; csp2 = bsp2; ysp1 = xsp1; ysp2 = xsp2; ysp3 = xsp3; csd1 = bsd1; zd = bzd1;
+                cfm1 = bfm1; cfm2 = bfm2; cfm3 = bfm3; cfp1 = bfp1; cfp2 = bfp2; cfp3 = bfp3;
             }
-            public readonly double cv1;
-            public readonly double cv2;
-            public readonly double yv1;
-            public readonly double yv2;
-            public readonly double yv3;
-            public readonly double csm1;
-            public readonly double csm2;
-            public readonly double ysm1;
-            public readonly double ysm2;
-            public readonly double ysm3;
-            public readonly double csp1;
-            public readonly double csp2;
-            public readonly double ysp1;
-            public readonly double ysp2;
-            public readonly double ysp3;
-            public readonly double csd1;
-            public readonly double zd;
-            public readonly double cfm1;
-            public readonly double cfm2;
-            public readonly double cfm3;
-            public readonly double cfp1;
-            public readonly double cfp2;
-            public readonly double cfp3;
+            public readonly double cv1, cv2, yv1, yv2, yv3, csm1, csm2, ysm1, ysm2, ysm3, csp1, csp2, ysp1, ysp2, ysp3,
+                csd1, zd, cfm1, cfm2, cfm3, cfp1, cfp2, cfp3;
         }
 
         private static readonly Dictionary<RadioClimate, ClimateSettings> _climateSettings = new Dictionary<RadioClimate, ClimateSettings> {
