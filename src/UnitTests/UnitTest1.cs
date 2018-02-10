@@ -169,12 +169,12 @@ namespace UnitTests
                                                     TerrainType = terrainType,
                                                 };
                                                 model.Variability.Mode = variabilityMode;
-                                                model.Variability.Confidence = percent;
+                                                model.Variability.Confidence = Math.Max(0.01, percent * 0.9);
                                                 model.Variability.Location = percent;
-                                                model.Variability.Time = percent;
+                                                model.Variability.Time = Math.Max(0.01, percent * 0.8);
                                                 model.Transmitter.Height = height;
                                                 model.Transmitter.SiteCriteria = siteCriteria;
-                                                model.Receiver.Height = height;
+                                                model.Receiver.Height = height * 0.8;
                                                 model.Receiver.SiteCriteria = siteCriteria;
                                                 yield return model;
                                             }
