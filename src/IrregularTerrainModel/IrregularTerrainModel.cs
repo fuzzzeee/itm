@@ -322,11 +322,18 @@ namespace LongleyRice
             {TerrainType.RuggedMountains, 500},
         };
 
+        /// <summary>
+        /// Creates a new <see cref="AreaModel"/>
+        /// </summary>
+        /// <param name="distance">Distance in kilometers</param>
         public AreaModel(double distance)
         {
             Distance = distance;
         }
 
+        /// <summary>
+        /// Distance in kilometers
+        /// </summary>
         public double Distance
         {
             get => _distance;
@@ -368,12 +375,20 @@ namespace LongleyRice
         private double _distance = 1;
         private double[] _elevations;
 
+        /// <summary>
+        /// Creates a new <see cref="PointToPointModel"/>
+        /// </summary>
+        /// <param name="elevations">The terrain heights between transmitter and receiver in meters</param>
+        /// <param name="distance">The distance between transmitter and receiver in meters</param>
         public PointToPointModel(double[] elevations, double distance)
         {
             Elevations = elevations;
             Distance = distance;
         }
 
+        /// <summary>
+        /// The terrain heights between transmitter and receiver in meters
+        /// </summary>
         public double[] Elevations
         {
             get => _elevations;
@@ -388,6 +403,9 @@ namespace LongleyRice
             }
         }
 
+        /// <summary>
+        /// The distance between transmitter and receiver in meters
+        /// </summary>
         public double Distance
         {
             get => _distance;

@@ -455,7 +455,7 @@ namespace LongleyRice
             return r.Real * r.Real + r.Imaginary * r.Imaginary;
         }
 
-        private void init_alos(prop_type prop)
+        private static void init_alos(prop_type prop)
         {
             prop.wls = 0.021 / (0.021 + prop.wn * prop.dh / Max(10000, prop.dlsa));
         }
