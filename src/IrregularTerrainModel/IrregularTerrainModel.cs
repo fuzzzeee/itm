@@ -19,9 +19,9 @@ namespace LongleyRice
                 var itm = new Original();
                 itm.point_to_pointMDH(e, model.Transmitter.Height, model.Receiver.Height, model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency,
                     (int)model.Climate, (int)model.Polarization, model.Variability.Time, model.Variability.Location, model.Variability.Confidence,
-                    out var dbloss, out var pm, out var deltaH, out var errnum);
+                    out var dbloss, out var propmode, out var deltaH, out var errnum);
                 model.DbLoss = dbloss;
-                model.PropMode = (PropMode)pm;
+                model.PropMode = (PropMode)propmode;
                 model.DeltaH = deltaH;
                 model.ErrorIndicator = errnum;
             }
@@ -466,7 +466,8 @@ namespace LongleyRice
                         level = PercentLevel.Time;
                     break;
             }
-            return _levels[level] ?? _defaultValue;
+            lock (_levels)
+                return _levels[level] ?? _defaultValue;
         }
 
         private void SetLevel(PercentLevel level, double value)
@@ -475,7 +476,8 @@ namespace LongleyRice
             {
                 if (value < _minValue || value > _maxValue)
                     throw new ArgumentOutOfRangeException(nameof(value), value, $"{level} must be between {_minValue} and {_maxValue}");
-                _levels[level] = value;
+                lock (_levels)
+                    _levels[level] = value;
                 OnPropertyChanged(level.ToString());
             }
         }
