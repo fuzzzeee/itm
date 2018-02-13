@@ -32,6 +32,32 @@ namespace LongleyRice
             public double LastPoint => Points[EndIndex];
         }
 
+        private class Antenna
+        {
+            /// <summary>
+            /// Structural height
+            /// </summary>
+            public double hg;
+            /// <summary>
+            /// Effective height
+            /// </summary>
+            public double he;
+            /// <summary>
+            /// Horizon distance
+            /// </summary>
+            public double dl;
+            /// <summary>
+            /// Horizon elevation angle
+            /// </summary>
+            public double the;
+            /// <summary>
+            /// Smooth earth horizon distance
+            /// </summary>
+            public double dls;
+            public SiteCriteria kst;
+            public double xl;
+        }
+
         // *************************************
         // C++ routines for this program are taken from
         // a translation of the FORTRAN code written by
@@ -48,6 +74,15 @@ namespace LongleyRice
         // ReSharper disable once InconsistentNaming
         private class prop_type
         {
+            public readonly Antenna Transmitter = new Antenna();
+            public readonly Antenna Receiver = new Antenna();
+            public readonly Antenna[] Antennae;
+
+            public prop_type()
+            {
+                Antennae = new[] { Transmitter, Receiver };
+            }
+
             /// <summary>
             /// Reference attenuation
             /// </summary>
@@ -56,10 +91,6 @@ namespace LongleyRice
             /// Distance
             /// </summary>
             public double dist;
-            /// <summary>
-            /// Antenna structural heights
-            /// </summary>
-            public readonly double[] hg = new double[2];
             /// <summary>
             /// Wave number (radio frequency)
             /// </summary>
@@ -80,18 +111,6 @@ namespace LongleyRice
             /// Surface transfer impedance of the ground
             /// </summary>
             public Complex zgnd;
-            /// <summary>
-            /// Antenna effective heights
-            /// </summary>
-            public readonly double[] he = new double[2];
-            /// <summary>
-            /// Horizon distances
-            /// </summary>
-            public readonly double[] dl = new double[2];
-            /// <summary>
-            /// Horizon elevation angles
-            /// </summary>
-            public readonly double[] the = new double[2];
             /// <summary>
             /// Error indicator
             /// </summary>
@@ -152,10 +171,6 @@ namespace LongleyRice
             /// Scatter coefficient
             /// </summary>
             public double ems;
-            /// <summary>
-            /// Smooth earth horizon distances
-            /// </summary>
-            public readonly double[] dls = new double[2];
             /// <summary>
             /// Total horizon distance
             /// </summary>
@@ -310,24 +325,24 @@ namespace LongleyRice
 
         private void init_adiff(prop_type prop)
         {
-            var q = prop.hg[0] * prop.hg[1];
-            prop.qk = prop.he[0] * prop.he[1] - q;
+            var q = prop.Transmitter.hg * prop.Receiver.hg;
+            prop.qk = prop.Transmitter.he * prop.Receiver.he - q;
             if (prop.mdp == ControlFlow.PointToPoint)
                 q += 10;
             prop.wd1 = Sqrt(1 + prop.qk / q);
             prop.xd1 = prop.dla + prop.tha / prop.gme;
             q = (1 - 0.8 * Exp(-prop.dlsa / 50000)) * prop.dh;
             q *= 0.78 * Exp(-Pow(q / 16.0, 0.25));
-            prop.afo = Min(15, 2.171 * Log(1 + 4.77e-4 * prop.hg[0] * prop.hg[1] * prop.wn * q));
+            prop.afo = Min(15, 2.171 * Log(1 + 4.77e-4 * prop.Transmitter.hg * prop.Receiver.hg * prop.wn * q));
             prop.qk = 1 / Complex.Abs(prop.zgnd);
             prop.aht = 20;
             prop.xht = 0;
-            for (var j = 0; j < 2; j++)
+            foreach (var antenna in prop.Antennae)
             {
-                var a = 0.5 * Pow(prop.dl[j], 2) / prop.he[j];
+                var a = 0.5 * Pow(antenna.dl, 2) / antenna.he;
                 var wa = Pow(a * prop.wn, THIRD);
                 var pk = prop.qk / wa;
-                q = (1.607 - pk) * 151 * wa * prop.dl[j] / a;
+                q = (1.607 - pk) * 151 * wa * antenna.dl / a;
                 prop.xht += q;
                 prop.aht += fht(q, pk);
             }
@@ -348,7 +363,7 @@ namespace LongleyRice
             var th = prop.tha + d * prop.gme;
             var ds = d - prop.dla;
             var q = 0.0795775 * prop.wn * ds * Pow(th, 2);
-            var adiffv = aknfe(q * prop.dl[0] / (ds + prop.dl[0])) + aknfe(q * prop.dl[1] / (ds + prop.dl[1]));
+            var adiffv = aknfe(q * prop.Transmitter.dl / (ds + prop.Transmitter.dl)) + aknfe(q * prop.Receiver.dl / (ds + prop.Receiver.dl));
             var a = ds / th;
             var wa = Pow(a * prop.wn, THIRD);
             var pk = prop.qk / wa;
@@ -361,8 +376,8 @@ namespace LongleyRice
 
         private void init_ascat(prop_type prop)
         {
-            prop.ad = prop.dl[0] - prop.dl[1];
-            prop.rr = prop.he[1] / prop.he[0];
+            prop.ad = prop.Transmitter.dl - prop.Receiver.dl;
+            prop.rr = prop.Receiver.he / prop.Transmitter.he;
             if (prop.ad < 0)
             {
                 prop.ad = -prop.ad;
@@ -387,10 +402,10 @@ namespace LongleyRice
                 h0 = prop.h0s;
             else
             {
-                th = prop.the[0] + prop.the[1] + d * prop.gme;
+                th = prop.Transmitter.the + prop.Receiver.the + d * prop.gme;
                 var r2 = 2 * prop.wn * th;
-                var r1 = r2 * prop.he[0];
-                r2 *= prop.he[1];
+                var r1 = r2 * prop.Transmitter.he;
+                r2 *= prop.Receiver.he;
                 if (r1 < 0.2 && r2 < 0.2)
                     return 1001;  // <==== early return
                 var ss = (d - prop.ad) / (d + prop.ad);
@@ -471,40 +486,40 @@ namespace LongleyRice
         {
             var q = (1 - 0.8 * Exp(-d / 50000.0)) * prop.dh;
             var s = 0.78 * q * Exp(-Pow(q / 16.0, 0.25));
-            q = prop.he[0] + prop.he[1];
+            q = prop.Transmitter.he + prop.Receiver.he;
             var sps = q / Sqrt(d * d + q * q);
             var r = (sps - prop.zgnd) / (sps + prop.zgnd) * Exp(-Min(10, prop.wn * s * sps));
             q = abq_alos(r);
             if (q < 0.25 || q < sps)
                 r = r * Sqrt(sps / q);
             var alosv = prop.emd * d + prop.aed;
-            q = prop.wn * prop.he[0] * prop.he[1] * 2 / d;
+            q = prop.wn * prop.Transmitter.he * prop.Receiver.he * 2 / d;
             if (q > 1.57)
                 q = 3.14 - 2.4649 / q;
             return (-4.343 * Log(abq_alos(new Complex(Cos(q), -Sin(q)) + r)) - alosv) * prop.wls + alosv;
         }
 
 
-        private static void qlra(SiteCriteria[] kst, RadioClimate klimx, VariabilityMode mdvarx, prop_type prop)
+        private static void qlra(RadioClimate klimx, VariabilityMode mdvarx, prop_type prop)
         {
-            for (var j = 0; j < 2; ++j)
+            foreach (var antenna in prop.Antennae)
             {
                 double q;
-                if (kst[j] == SiteCriteria.Random)
-                    prop.he[j] = prop.hg[j];
+                if (antenna.kst == SiteCriteria.Random)
+                    antenna.he = antenna.hg;
                 else
                 {
-                    if (kst[j] != SiteCriteria.Careful)
+                    if (antenna.kst != SiteCriteria.Careful)
                         q = 9;
                     else
                         q = 4;
-                    if (prop.hg[j] < 5)
-                        q *= Sin(0.3141593 * prop.hg[j]);
-                    prop.he[j] = prop.hg[j] + (1 + q) * Exp(-Min(20, 2 * prop.hg[j] / Max(1e-3, prop.dh)));
+                    if (antenna.hg < 5)
+                        q *= Sin(0.3141593 * antenna.hg);
+                    antenna.he = antenna.hg + (1 + q) * Exp(-Min(20, 2 * antenna.hg / Max(1e-3, prop.dh)));
                 }
-                q = Sqrt(2 * prop.he[j] / prop.gme);
-                prop.dl[j] = q * Exp(-0.07 * Sqrt(prop.dh / Max(prop.he[j], 5)));
-                prop.the[j] = (0.65 * prop.dh * (q / prop.dl[j] - 1) - 2 * prop.he[j]) / q;
+                q = Sqrt(2 * antenna.he / prop.gme);
+                antenna.dl = q * Exp(-0.07 * Sqrt(prop.dh / Max(antenna.he, 5)));
+                antenna.the = (0.65 * prop.dh * (q / antenna.dl - 1) - 2 * antenna.he) / q;
             }
             prop.mdp = ControlFlow.AreaBegin;
             prop.mdvar = mdvarx;
@@ -522,25 +537,25 @@ namespace LongleyRice
         {
             if (prop.mdp != ControlFlow.AreaContinue)
             {
-                for (var j = 0; j < 2; j++)
-                    prop.dls[j] = Sqrt(2 * prop.he[j] / prop.gme);
-                prop.dlsa = prop.dls[0] + prop.dls[1];
-                prop.dla = prop.dl[0] + prop.dl[1];
-                prop.tha = Max(prop.the[0] + prop.the[1], -prop.dla * prop.gme);
+                foreach (var antenna in prop.Antennae)
+                    antenna.dls = Sqrt(2 * antenna.he / prop.gme);
+                prop.dlsa = prop.Transmitter.dls + prop.Receiver.dls;
+                prop.dla = prop.Transmitter.dl + prop.Receiver.dl;
+                prop.tha = Max(prop.Transmitter.the + prop.Receiver.the, -prop.dla * prop.gme);
                 prop.wlos = false;
                 prop.wscat = false;
                 if (prop.wn < 0.838 || prop.wn > 210)
                 {
                     prop.kwx = Max(prop.kwx, 1);
                 }
-                for (var j = 0; j < 2; j++)
-                    if (prop.hg[j] < 1 || prop.hg[j] > 1000)
+                foreach (var antenna in prop.Antennae)
+                    if (antenna.hg < 1 || antenna.hg > 1000)
                     {
                         prop.kwx = Max(prop.kwx, 1);
                     }
-                for (var j = 0; j < 2; j++)
-                    if (Abs(prop.the[j]) > 200e-3 || prop.dl[j] < 0.1 * prop.dls[j] ||
-                       prop.dl[j] > 3 * prop.dls[j])
+                foreach (var antenna in prop.Antennae)
+                    if (Abs(antenna.the) > 200e-3 || antenna.dl < 0.1 * antenna.dls ||
+                        antenna.dl > 3 * antenna.dls)
                     {
                         prop.kwx = Max(prop.kwx, 3);
                     }
@@ -551,12 +566,12 @@ namespace LongleyRice
                 {
                     prop.kwx = 4;
                 }
-                for (var j = 0; j < 2; j++)
-                    if (prop.hg[j] < 0.5 || prop.hg[j] > 3000)
+                foreach (var antenna in prop.Antennae)
+                    if (antenna.hg < 0.5 || antenna.hg > 3000)
                     {
                         prop.kwx = 4;
                     }
-                prop.dmin = Abs(prop.he[0] - prop.he[1]) / 200e-3;
+                prop.dmin = Abs(prop.Transmitter.he - prop.Receiver.he) / 200e-3;
                 init_adiff(prop);
                 prop.xae = Pow(prop.wn * Pow(prop.gme, 2), -THIRD);
                 var d3 = Max(prop.dlsa, 1.3787 * prop.xae + prop.dla);
@@ -593,7 +608,7 @@ namespace LongleyRice
                     init_alos(prop);
                     var d2 = prop.dlsa;
                     var a2 = prop.aed + d2 * prop.emd;
-                    var d0 = 1.908 * prop.wn * prop.he[0] * prop.he[1];
+                    var d0 = 1.908 * prop.wn * prop.Transmitter.he * prop.Receiver.he;
                     double d1;
                     if (prop.aed >= 0)
                     {
@@ -719,7 +734,7 @@ namespace LongleyRice
                         prop.gp = prop.cs.cfp1 + prop.cs.cfp2 / (Pow(prop.cs.cfp3 * q, 2) + 1);
                         goto case Changes.AntennaHeight;
                     case Changes.AntennaHeight:
-                        prop.dexa = Sqrt(18000000 * prop.he[0]) + Sqrt(18000000 * prop.he[1]) + Pow(575.7e12 / prop.wn, THIRD);
+                        prop.dexa = Sqrt(18000000 * prop.Transmitter.he) + Sqrt(18000000 * prop.Receiver.he) + Pow(575.7e12 / prop.wn, THIRD);
                         goto case Changes.Distance;
                     case Changes.Distance:
                         if (prop.dist < prop.dexa)
@@ -801,15 +816,15 @@ namespace LongleyRice
         {
             var np = pfl.EndIndex;
             var xi = pfl.DeltaDistance;
-            var za = pfl.FirstPoint + prop.hg[0];
-            var zb = pfl.LastPoint + prop.hg[1];
+            var za = pfl.FirstPoint + prop.Transmitter.hg;
+            var zb = pfl.LastPoint + prop.Receiver.hg;
             var qc = 0.5 * prop.gme;
             var q = qc * prop.dist;
-            prop.the[1] = (zb - za) / prop.dist;
-            prop.the[0] = prop.the[1] - q;
-            prop.the[1] = -prop.the[1] - q;
-            prop.dl[0] = prop.dist;
-            prop.dl[1] = prop.dist;
+            prop.Receiver.the = (zb - za) / prop.dist;
+            prop.Transmitter.the = prop.Receiver.the - q;
+            prop.Receiver.the = -prop.Receiver.the - q;
+            prop.Transmitter.dl = prop.dist;
+            prop.Receiver.dl = prop.dist;
             if (np >= 2)
             {
                 var sa = 0.0;
@@ -819,20 +834,20 @@ namespace LongleyRice
                 {
                     sa += xi;
                     sb -= xi;
-                    q = pfl.Points[i] - (qc * sa + prop.the[0]) * sa - za;
+                    q = pfl.Points[i] - (qc * sa + prop.Transmitter.the) * sa - za;
                     if (q > 0)
                     {
-                        prop.the[0] += q / sa;
-                        prop.dl[0] = sa;
+                        prop.Transmitter.the += q / sa;
+                        prop.Transmitter.dl = sa;
                         wq = false;
                     }
                     if (!wq)
                     {
-                        q = pfl.Points[i] - (qc * sb + prop.the[1]) * sb - zb;
+                        q = pfl.Points[i] - (qc * sb + prop.Receiver.the) * sb - zb;
                         if (q > 0)
                         {
-                            prop.the[1] += q / sb;
-                            prop.dl[1] = sb;
+                            prop.Receiver.the += q / sb;
+                            prop.Receiver.dl = sb;
                         }
                     }
                 }
@@ -969,46 +984,44 @@ namespace LongleyRice
         // ReSharper disable once InconsistentNaming
         private void qlrpfl(Elevations pfl, RadioClimate klimx, VariabilityMode mdvarx, prop_type prop)
         {
-            var xl = new double[2];
-
             prop.dist = pfl.EndIndex * pfl.DeltaDistance;
             hzns(pfl, prop);
-            for (var j = 0; j < 2; j++)
-                xl[j] = Min(15 * prop.hg[j], 0.1 * prop.dl[j]);
-            xl[1] = prop.dist - xl[1];
-            prop.dh = d1thx(pfl, xl[0], xl[1]);
-            if (prop.dl[0] + prop.dl[1] > 1.5 * prop.dist)
+            foreach (var antenna in prop.Antennae)
+                antenna.xl = Min(15 * antenna.hg, 0.1 * antenna.dl);
+            prop.Receiver.xl = prop.dist - prop.Receiver.xl;
+            prop.dh = d1thx(pfl, prop.Transmitter.xl, prop.Receiver.xl);
+            if (prop.Transmitter.dl + prop.Receiver.dl > 1.5 * prop.dist)
             {
-                z1sq1(pfl, xl[0], xl[1], out var za, out var zb);
-                prop.he[0] = prop.hg[0] + Dim(pfl.FirstPoint, za);
-                prop.he[1] = prop.hg[1] + Dim(pfl.LastPoint, zb);
-                for (var j = 0; j < 2; j++)
-                    prop.dl[j] = Sqrt(2 * prop.he[j] / prop.gme) *
-                                Exp(-0.07 * Sqrt(prop.dh / Max(prop.he[j], 5)));
-                var q = prop.dl[0] + prop.dl[1];
+                z1sq1(pfl, prop.Transmitter.xl, prop.Receiver.xl, out var za, out var zb);
+                prop.Transmitter.he = prop.Transmitter.hg + Dim(pfl.FirstPoint, za);
+                prop.Receiver.he = prop.Receiver.hg + Dim(pfl.LastPoint, zb);
+                foreach (var antenna in prop.Antennae)
+                    antenna.dl = Sqrt(2 * antenna.he / prop.gme) *
+                                Exp(-0.07 * Sqrt(prop.dh / Max(antenna.he, 5)));
+                var q = prop.Transmitter.dl + prop.Receiver.dl;
 
                 if (q <= prop.dist)
                 {
                     q = Pow(prop.dist / q, 2);
-                    for (var j = 0; j < 2; j++)
+                    foreach (var antenna in prop.Antennae)
                     {
-                        prop.he[j] *= q;
-                        prop.dl[j] = Sqrt(2 * prop.he[j] / prop.gme) *
-                              Exp(-0.07 * Sqrt(prop.dh / Max(prop.he[j], 5)));
+                        antenna.he *= q;
+                        antenna.dl = Sqrt(2 * antenna.he / prop.gme) *
+                              Exp(-0.07 * Sqrt(prop.dh / Max(antenna.he, 5)));
                     }
                 }
-                for (var j = 0; j < 2; j++)
+                foreach (var antenna in prop.Antennae)
                 {
-                    q = Sqrt(2 * prop.he[j] / prop.gme);
-                    prop.the[j] = (0.65 * prop.dh * (q / prop.dl[j] - 1) - 2 * prop.he[j]) / q;
+                    q = Sqrt(2 * antenna.he / prop.gme);
+                    antenna.the = (0.65 * prop.dh * (q / antenna.dl - 1) - 2 * antenna.he) / q;
                 }
             }
             else
             {
-                z1sq1(pfl, xl[0], 0.9 * prop.dl[0], out var za, out _);
-                z1sq1(pfl, prop.dist - 0.9 * prop.dl[1], xl[1], out _, out var zb);
-                prop.he[0] = prop.hg[0] + Dim(pfl.FirstPoint, za);
-                prop.he[1] = prop.hg[1] + Dim(pfl.LastPoint, zb);
+                z1sq1(pfl, prop.Transmitter.xl, 0.9 * prop.Transmitter.dl, out var za, out _);
+                z1sq1(pfl, prop.dist - 0.9 * prop.Receiver.dl, prop.Receiver.xl, out _, out var zb);
+                prop.Transmitter.he = prop.Transmitter.hg + Dim(pfl.FirstPoint, za);
+                prop.Receiver.he = prop.Receiver.hg + Dim(pfl.LastPoint, zb);
             }
             prop.mdp = ControlFlow.PointToPoint;
             prop.mdvar = mdvarx;
@@ -1037,8 +1050,8 @@ namespace LongleyRice
         //                          Results are probably invalid.
         {
             var prop = new prop_type();
-            prop.hg[0] = tht_m;
-            prop.hg[1] = rht_m;
+            prop.Transmitter.hg = tht_m;
+            prop.Receiver.hg = rht_m;
             prop.klim = radio_climate;
             prop.lvar = Changes.All;
             prop.mdp = ControlFlow.PointToPoint;
@@ -1100,13 +1113,14 @@ namespace LongleyRice
             //                          Results are probably invalid.
             var prop = new prop_type();
             prop.dh = deltaH;
-            prop.hg[0] = tht_m;
-            prop.hg[1] = rht_m;
+            prop.Transmitter.hg = tht_m;
+            prop.Receiver.hg = rht_m;
             prop.klim = radio_climate;
             prop.ens = eno_ns_surfref;
+            prop.Transmitter.kst = TSiteCriteria;
+            prop.Receiver.kst = RSiteCriteria;
             qlrps(frq_mhz, 0, eno_ns_surfref, pol, eps_dielect, sgm_conductivity, prop);
-            var kst = new[] { TSiteCriteria, RSiteCriteria };
-            qlra(kst, prop.klim, ModVar, prop);
+            qlra(prop.klim, ModVar, prop);
             if (prop.lvar < Changes.Distance)
                 prop.lvar = Changes.Distance;
             lrprop(dist_km * 1000, prop);
