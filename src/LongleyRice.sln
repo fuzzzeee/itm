@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IrregularTerrainModel", "IrregularTerrainModel\IrregularTerrainModel.csproj", "{DD7B09E2-AC65-43CB-B4B5-A2CD1188290D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{DEE10F17-903A-4EBF-A39C-78B28E4B4BCA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{148C14A6-B963-44BE-AE11-28C19D192CC4} = {148C14A6-B963-44BE-AE11-28C19D192CC4}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "itm", "itm\itm.vcxproj", "{148C14A6-B963-44BE-AE11-28C19D192CC4}"
 EndProject
