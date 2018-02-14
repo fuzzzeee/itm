@@ -331,7 +331,7 @@ namespace LongleyRice
                 q += 10;
             prop.wd1 = Sqrt(1 + prop.qk / q);
             prop.xd1 = prop.dla + prop.tha / prop.gme;
-            q = (1 - 0.8 * Exp(-prop.dlsa / 50000)) * prop.dh;
+            q = (1 - 0.8 * Exp(-prop.dlsa / 50000.0)) * prop.dh;
             q *= 0.78 * Exp(-Pow(q / 16.0, 0.25));
             prop.afo = Min(15, 2.171 * Log(1 + 4.77e-4 * prop.Transmitter.hg * prop.Receiver.hg * prop.wn * q));
             prop.qk = 1 / Complex.Abs(prop.zgnd);
@@ -369,7 +369,7 @@ namespace LongleyRice
             var pk = prop.qk / wa;
             q = (1.607 - pk) * 151 * wa * th + prop.xht;
             var ar = 0.05751 * q - 4.343 * Log(q) - prop.aht;
-            q = (prop.wd1 + prop.xd1 / d) * Min((1 - 0.8 * Exp(-d / 50000)) * prop.dh * prop.wn, 6283.2);
+            q = (prop.wd1 + prop.xd1 / d) * Min((1 - 0.8 * Exp(-d / 50000.0)) * prop.dh * prop.wn, 6283.2);
             var wd = 25.1 / (25.1 + Sqrt(q));
             return ar * wd + (1 - wd) * adiffv + prop.afo;
         }
