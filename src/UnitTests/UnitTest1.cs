@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace UnitTests
@@ -23,9 +24,12 @@ namespace UnitTests
             double frq_mhz, int radio_climate, int pol, double pctTime, double pctLoc,
             double pctConf, out double dbloss, IntPtr strmode, out int errnum);
 
+        public TestContext TestContext { get; set; }
+
         [TestMethod]
         public void TestMethod1()
         {
+            var results = new List<PointToPointModel>();
             var times = new Dictionary<int, Stopwatch>
             {
                 {0, new Stopwatch()},
@@ -49,6 +53,8 @@ namespace UnitTests
                 times[1].Start();
                 itm.PointToPoint(p);
                 times[1].Stop();
+
+                results.Add(p);
 
                 Assert.AreEqual(Math.Round(dbloss0, 10), Math.Round(p.DbLoss, 10)); // fractional precision variance after 10 decimal places
                 Assert.AreEqual(propMode0, (int)p.PropMode);
@@ -99,6 +105,16 @@ namespace UnitTests
 
                 Assert.AreEqual(dbloss1, p.DbLoss);
                 Assert.AreEqual(errnum1, p.ErrorIndicator);
+            }
+
+            TestContext.WriteLine($"C++ = {times[0].Elapsed}, C# Original = {times[1].Elapsed}, C# Refactored = {times[2].Elapsed}");
+
+            var path = Path.Combine(TestContext.TestDir, "results.csv");
+            TestContext.WriteLine($"Writing results to {path}");
+            using (var sw = new StreamWriter(Path.Combine(TestContext.TestRunResultsDirectory, path)))
+            {
+                var w = new CsvHelper.CsvWriter(sw);
+                w.WriteRecords(results);
             }
         }
 
