@@ -43,5 +43,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Refactored.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="IrregularTerrainModel.nuspec" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

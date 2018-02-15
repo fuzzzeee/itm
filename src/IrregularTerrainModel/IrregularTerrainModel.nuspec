@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>IrregularTerrainModel</id>
+    <version>$version$</version>
+    <description>$description$</description>
+    <title>Irregular Terrain Model (ITM) (Longley-Rice)</title>
+    <authors>Ben Just</authors>
+    <owners>Ben Just</owners>
+    <tags>ITM ITS NTIA Longley-Rice</tags>
+  </metadata>
+</package>
