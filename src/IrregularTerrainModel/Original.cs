@@ -902,7 +902,7 @@ namespace LongleyRice
             return qerfv;
         }
 
-        unsafe double d1thx(double[] pfl, double x1, double x2)
+        double d1thx(double[] pfl, double x1, double x2)
         {
             int np, ka, kb, n, k, j;
             double d1thxv, sn, xa, xb;
@@ -942,8 +942,13 @@ namespace LongleyRice
                 s[j + 2] -= xa;
                 xa = xa + xb;
             }
-            fixed (double* s2 = &s[2])
-                d1thxv = qtile(n - 1, s2, ka - 1) - qtile(n - 1, s2, kb - 1);
+
+            unsafe
+            {
+                fixed (double* s2 = &s[2])
+                    d1thxv = qtile(n - 1, s2, ka - 1) - qtile(n - 1, s2, kb - 1);
+            }
+
             d1thxv /= 1.0 - 0.8 * Exp(-(x2 - x1) / 50.0e3);
             return d1thxv;
         }

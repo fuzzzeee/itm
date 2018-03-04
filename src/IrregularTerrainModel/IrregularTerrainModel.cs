@@ -6,6 +6,9 @@ namespace LongleyRice
 {
     public class IrregularTerrainModel
     {
+        /// <summary>
+        /// Only used for unit testing. Do not set to true unless you're testing or want the algorithm to run slower
+        /// </summary>
         public bool UseOriginal { get; set; }
 
         public void PointToPoint(PointToPointModel model)
