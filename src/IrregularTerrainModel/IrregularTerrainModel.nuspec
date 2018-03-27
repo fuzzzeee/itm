@@ -3,15 +3,12 @@
   <metadata>
     <id>IrregularTerrainModel</id>
     <version>$version$</version>
-    <description>$description$</description>
+    <description>The ITS model of radio propagation for frequencies between 20 MHz and 20 GHz (the Longley-Rice model) (named for Anita Longley &amp; Phil Rice, 1968) is a general purpose model that can be applied to a large variety of engineering problems. The model, which is based on electromagnetic theory and on statistical analyses of both terrain features and radio measurements, predicts the median attenuation of a radio signal as a function of distance and the variability of the signal in time and in space.</description>
     <title>Irregular Terrain Model (ITM) (Longley-Rice)</title>
     <authors>Ben Just</authors>
     <owners>Ben Just</owners>
     <tags>ITM ITS NTIA Longley-Rice</tags>
     <projectUrl>https://github.com/fuzzzeee/itm</projectUrl>
     <licenseUrl>https://www.its.bldrdoc.gov/resources/radio-propagation-software/itm/itm.aspx</licenseUrl>
-    <summary>
-      The ITS model of radio propagation for frequencies between 20 MHz and 20 GHz (the Longley-Rice model) (named for Anita Longley &amp; Phil Rice, 1968) is a general purpose model that can be applied to a large variety of engineering problems. The model, which is based on electromagnetic theory and on statistical analyses of both terrain features and radio measurements, predicts the median attenuation of a radio signal as a function of distance and the variability of the signal in time and in space.
-    </summary>
   </metadata>
 </package>

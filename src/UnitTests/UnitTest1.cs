@@ -43,7 +43,7 @@ namespace UnitTests
                 var e = new double[p.Elevations.Length + 2];
                 e[0] = p.Elevations.Length - 1;
                 e[1] = p.Distance / e[0];
-                Buffer.BlockCopy(p.Elevations, 0, e, sizeof(double) * 2, sizeof(double) * p.Elevations.Length);
+                p.Elevations.CopyTo(e, 2);
                 times[0].Start();
                 point_to_pointMDH(e, p.Transmitter.Height, p.Receiver.Height, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency, (int)p.Climate, (int)p.Polarization, p.Variability.Time, p.Variability.Location, p.Variability.Confidence,
                     out var dbloss0, out var propMode0, out var deltaH0, out var errnum0);

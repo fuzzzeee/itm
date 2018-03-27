@@ -16,7 +16,7 @@ namespace LongleyRice
             var e = new double[model.Elevations.Length + 2];
             e[0] = model.Elevations.Length - 1;
             e[1] = model.Distance / e[0];
-            Buffer.BlockCopy(model.Elevations, 0, e, sizeof(double) * 2, sizeof(double) * model.Elevations.Length);
+            model.Elevations.CopyTo(e, 2);
             if (UseOriginal)
             {
                 var itm = new Original();
