@@ -1080,7 +1080,7 @@ namespace LongleyRice
             else // q > 0
                 propmode = PropMode.DoubleHorizon;
 
-            if (propmode != 0)
+            if (propmode != PropMode.LineOfSight)
             {
                 if (prop.dist <= prop.dlsa || prop.dist <= prop.dx)
                     propmode |= PropMode.DiffractionDominant;
