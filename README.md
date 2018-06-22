@@ -1,5 +1,4 @@
-# itm
-Longley Rice Irregular Terrain Model
+# Irregular Terrain Model (ITM) (Longley-Rice)
 
 A C# port of the C++ code (itself a port of FORTRAN code) found at https://www.its.bldrdoc.gov/resources/radio-propagation-software/itm/itm.aspx
 
