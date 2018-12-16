@@ -1,7 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard1.1;net40</TargetFrameworks>
+    <Description>The ITS model of radio propagation for frequencies between 20 MHz and 20 GHz (the Longley-Rice model) (named for Anita Longley &amp;amp; Phil Rice, 1968) is a general purpose model that can be applied to a large variety of engineering problems. The model, which is based on electromagnetic theory and on statistical analyses of both terrain features and radio measurements, predicts the median attenuation of a radio signal as a function of distance and the variability of the signal in time and in space.</Description>
+    <PackageTags>ITM ITS NTIA Longley-Rice</PackageTags>
+    <PackageLicenseUrl>https://www.its.bldrdoc.gov/resources/radio-propagation-software/itm/itm.aspx</PackageLicenseUrl>
+    <PackageProjectUrl></PackageProjectUrl>
+    <Authors>Ben Just, William ("Billy") Kozma, Anita Longley &amp; Phil Rice</Authors>
+    <Company>Institute for Telecommunication Sciences</Company>
+    <Product>Irregular Terrain Model (ITM) (Longley-Rice) (20 MHz – 20 GHz)</Product>
+    <RepositoryUrl>https://github.com/fuzzzeee/itm</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
