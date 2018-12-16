@@ -65,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IrregularTerrainModel\IrregularTerrainModel.csproj">
-      <Project>{dd7b09e2-ac65-43cb-b4b5-a2cd1188290d}</Project>
+      <Project>{51c12769-8527-4e06-a987-9dd8742dd3bf}</Project>
       <Name>IrregularTerrainModel</Name>
     </ProjectReference>
   </ItemGroup>
