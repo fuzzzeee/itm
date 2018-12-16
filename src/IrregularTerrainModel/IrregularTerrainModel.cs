@@ -69,6 +69,9 @@ namespace LongleyRice
         private double _height;
         private SiteCriteria _siteCriteria = SiteCriteria.Random;
 
+        /// <summary>
+        /// The antenna height in meters
+        /// </summary>
         public double Height
         {
             get => _height;
@@ -283,6 +286,15 @@ namespace LongleyRice
             }
         }
 
+        /// <summary>
+        /// <list type="table">
+        /// <item><term>0</term><description>No Error</description></item>
+        /// <item><term>1</term><description>Warning: Some parameters are nearly out of range. Results should be used with caution.</description></item>
+        /// <item><term>2</term><description>Note: Default parameters have been substituted for impossible ones.</description></item>
+        /// <item><term>3</term><description>Warning: A combination of parameters is out of range. Results are probably invalid.</description></item>
+        /// <item><term>Other</term><description>Warning: Some parameters are out of range. Results are probably invalid.</description></item>
+        /// </list>
+        /// </summary>
         public int ErrorIndicator
         {
             get => _errorIndicator;
