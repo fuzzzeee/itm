@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿#if DEBUG
+using System.Numerics;
 using static System.Math;
 
 namespace LongleyRice
@@ -1356,3 +1357,4 @@ namespace LongleyRice
         }
     }
 }
+#endif

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -276,7 +276,7 @@ namespace LongleyRice
         private static double h0f(double r, double et)
         {
             double q;
-            var it = (int)et;
+            var it = (int) et;
             if (it <= 0)
             {
                 it = 1;

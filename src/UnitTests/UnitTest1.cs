@@ -29,6 +29,7 @@ namespace UnitTests
         [TestMethod]
         public void TestMethod1()
         {
+            const double delta = 0.00000001;
             var results = new List<PointToPointModel>();
             var times = new Dictionary<int, Stopwatch>
             {
@@ -57,9 +58,9 @@ namespace UnitTests
 
                 results.Add(p);
 
-                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
+                Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual(propMode0, (int)p.PropMode);
-                Assert.AreEqual(deltaH0, p.DeltaH, 0.00000001);
+                Assert.AreEqual(deltaH0, p.DeltaH, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
 
                 itm.UseOriginal = false;
@@ -68,9 +69,9 @@ namespace UnitTests
                 itm.PointToPoint(p);
                 times[2].Stop();
 
-                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
+                Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual((int)propMode0, (int)p.PropMode);
-                Assert.AreEqual(deltaH0, p.DeltaH, 0.00000001);
+                Assert.AreEqual(deltaH0, p.DeltaH, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
             }
 
@@ -90,7 +91,7 @@ namespace UnitTests
                 itm.Area(p);
                 times[1].Stop();
 
-                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
+                Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
 
                 itm.UseOriginal = false;
@@ -99,7 +100,7 @@ namespace UnitTests
                 itm.Area(p);
                 times[2].Stop();
 
-                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
+                Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
             }
 
