@@ -24,4 +24,8 @@
     <DocumentationFile>IrregularTerrainModel.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.1|AnyCPU'">
+    <DocumentationFile>IrregularTerrainModel.xml</DocumentationFile>
+  </PropertyGroup>
+
 </Project>
