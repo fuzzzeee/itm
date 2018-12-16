@@ -10,6 +10,7 @@
     <Company>Institute for Telecommunication Sciences</Company>
     <Product>Irregular Terrain Model (ITM) (Longley-Rice) (20 MHz – 20 GHz)</Product>
     <RepositoryUrl>https://github.com/fuzzzeee/itm</RepositoryUrl>
+    <RootNamespace>LongleyRice</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

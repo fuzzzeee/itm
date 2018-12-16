@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
-using static System.Math;
 
 namespace LongleyRice
 {
-    class Refactored
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "IdentifierTypo")]
+    internal class Refactored
     {
         private class Elevations
         {
@@ -68,10 +70,8 @@ namespace LongleyRice
         // *************************************
 
 
-        // ReSharper disable once InconsistentNaming
         private const double THIRD = 1.0 / 3.0;
 
-        // ReSharper disable once InconsistentNaming
         private class prop_type
         {
             public readonly Antenna Transmitter = new Antenna();
@@ -216,13 +216,12 @@ namespace LongleyRice
         /// </summary>
         /// <param name="v2"></param>
         /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
         private static double aknfe(double v2)
         {
             if (v2 < 5.76)
-                return 6.02 + 9.11 * Sqrt(v2) - 1.27 * v2;
+                return 6.02 + 9.11 * Math.Sqrt(v2) - 1.27 * v2;
             else
-                return 12.953 + 4.343 * Log(v2);
+                return 12.953 + 4.343 * Math.Log(v2);
         }
 
         /// <summary>
@@ -231,18 +230,17 @@ namespace LongleyRice
         /// <param name="x"></param>
         /// <param name="pk"></param>
         /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
         private static double fht(double x, double pk)
         {
             double fhtv;
             if (x < 200)
             {
-                var w = -Log(pk);
-                if (pk < 1e-5 || x * Pow(w, 3) > 5495)
+                var w = -Math.Log(pk);
+                if (pk < 1e-5 || x * Math.Pow(w, 3) > 5495)
                 {
                     fhtv = -117;
                     if (x > 1)
-                        fhtv = 17.372 * Log(x) + fhtv;
+                        fhtv = 17.372 * Math.Log(x) + fhtv;
                 }
                 else
                 {
@@ -251,19 +249,17 @@ namespace LongleyRice
             }
             else
             {
-                fhtv = 0.05751 * x - 4.343 * Log(x);
+                fhtv = 0.05751 * x - 4.343 * Math.Log(x);
                 if (x < 2000)
                 {
-                    var w = 0.0134 * x * Exp(-0.005 * x);
-                    fhtv = (1 - w) * fhtv + w * (17.372 * Log(x) - 117);
+                    var w = 0.0134 * x * Math.Exp(-0.005 * x);
+                    fhtv = (1 - w) * fhtv + w * (17.372 * Math.Log(x) - 117);
                 }
             }
             return fhtv;
         }
 
-        // ReSharper disable once InconsistentNaming
         private static readonly int[] _h0f_a = { 25, 80, 177, 395, 705 };
-        // ReSharper disable once InconsistentNaming
         private static readonly int[] _h0f_b = { 24, 45, 68, 80, 105 };
 
         /// <summary>
@@ -272,7 +268,6 @@ namespace LongleyRice
         /// <param name="r"></param>
         /// <param name="et"></param>
         /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
         private static double h0f(double r, double et)
         {
             double q;
@@ -289,20 +284,16 @@ namespace LongleyRice
             }
             else
                 q = et - it;
-            var x = Pow(1 / r, 2);
-            // ReSharper disable once InconsistentNaming
-            var h0fv = 4.343 * Log((_h0f_a[it - 1] * x + _h0f_b[it - 1]) * x + 1);
+            var x = Math.Pow(1 / r, 2);
+            var h0fv = 4.343 * Math.Log((_h0f_a[it - 1] * x + _h0f_b[it - 1]) * x + 1);
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (q != 0)
-                h0fv = (1 - q) * h0fv + q * 4.343 * Log((_h0f_a[it] * x + _h0f_b[it]) * x + 1);
+                h0fv = (1 - q) * h0fv + q * 4.343 * Math.Log((_h0f_a[it] * x + _h0f_b[it]) * x + 1);
             return h0fv;
         }
 
-        // ReSharper disable once InconsistentNaming
         private static readonly double[] _ahd_a = { 133.4, 104.6, 71.8 };
-        // ReSharper disable once InconsistentNaming
         private static readonly double[] _ahd_b = { 0.332e-3, 0.212e-3, 0.157e-3 };
-        // ReSharper disable once InconsistentNaming
         private static readonly double[] _ahd_c = { -4.343, -1.086, 2.171 };
 
         /// <summary>
@@ -310,7 +301,6 @@ namespace LongleyRice
         /// </summary>
         /// <param name="td"></param>
         /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
         private static double ahd(double td)
         {
             int i;
@@ -320,7 +310,7 @@ namespace LongleyRice
                 i = 1;
             else
                 i = 2;
-            return _ahd_a[i] + _ahd_b[i] * td + _ahd_c[i] * Log(td);
+            return _ahd_a[i] + _ahd_b[i] * td + _ahd_c[i] * Math.Log(td);
         }
 
         private void init_adiff(prop_type prop)
@@ -329,18 +319,18 @@ namespace LongleyRice
             prop.qk = prop.Transmitter.he * prop.Receiver.he - q;
             if (prop.mdp == ControlFlow.PointToPoint)
                 q += 10;
-            prop.wd1 = Sqrt(1 + prop.qk / q);
+            prop.wd1 = Math.Sqrt(1 + prop.qk / q);
             prop.xd1 = prop.dla + prop.tha / prop.gme;
-            q = (1 - 0.8 * Exp(-prop.dlsa / 50000.0)) * prop.dh;
-            q *= 0.78 * Exp(-Pow(q / 16.0, 0.25));
-            prop.afo = Min(15, 2.171 * Log(1 + 4.77e-4 * prop.Transmitter.hg * prop.Receiver.hg * prop.wn * q));
+            q = (1 - 0.8 * Math.Exp(-prop.dlsa / 50000.0)) * prop.dh;
+            q *= 0.78 * Math.Exp(-Math.Pow(q / 16.0, 0.25));
+            prop.afo = Math.Min(15, 2.171 * Math.Log(1 + 4.77e-4 * prop.Transmitter.hg * prop.Receiver.hg * prop.wn * q));
             prop.qk = 1 / Complex.Abs(prop.zgnd);
             prop.aht = 20;
             prop.xht = 0;
             foreach (var antenna in prop.Antennae)
             {
-                var a = 0.5 * Pow(antenna.dl, 2) / antenna.he;
-                var wa = Pow(a * prop.wn, THIRD);
+                var a = 0.5 * Math.Pow(antenna.dl, 2) / antenna.he;
+                var wa = Math.Pow(a * prop.wn, THIRD);
                 var pk = prop.qk / wa;
                 q = (1.607 - pk) * 151 * wa * antenna.dl / a;
                 prop.xht += q;
@@ -357,20 +347,19 @@ namespace LongleyRice
         /// <param name="d"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
         private double adiff(double d, prop_type prop)
         {
             var th = prop.tha + d * prop.gme;
             var ds = d - prop.dla;
-            var q = 0.0795775 * prop.wn * ds * Pow(th, 2);
+            var q = 0.0795775 * prop.wn * ds * Math.Pow(th, 2);
             var adiffv = aknfe(q * prop.Transmitter.dl / (ds + prop.Transmitter.dl)) + aknfe(q * prop.Receiver.dl / (ds + prop.Receiver.dl));
             var a = ds / th;
-            var wa = Pow(a * prop.wn, THIRD);
+            var wa = Math.Pow(a * prop.wn, THIRD);
             var pk = prop.qk / wa;
             q = (1.607 - pk) * 151 * wa * th + prop.xht;
-            var ar = 0.05751 * q - 4.343 * Log(q) - prop.aht;
-            q = (prop.wd1 + prop.xd1 / d) * Min((1 - 0.8 * Exp(-d / 50000.0)) * prop.dh * prop.wn, 6283.2);
-            var wd = 25.1 / (25.1 + Sqrt(q));
+            var ar = 0.05751 * q - 4.343 * Math.Log(q) - prop.aht;
+            q = (prop.wd1 + prop.xd1 / d) * Math.Min((1 - 0.8 * Math.Exp(-d / 50000.0)) * prop.dh * prop.wn, 6283.2);
+            var wd = 25.1 / (25.1 + Math.Sqrt(q));
             return ar * wd + (1 - wd) * adiffv + prop.afo;
         }
 
@@ -393,7 +382,6 @@ namespace LongleyRice
         /// <param name="d"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
         private double ascat(double d, prop_type prop)
         {
             double th;
@@ -410,22 +398,22 @@ namespace LongleyRice
                     return 1001;  // <==== early return
                 var ss = (d - prop.ad) / (d + prop.ad);
                 var q = prop.rr / ss;
-                ss = Max(0.1, ss);
-                q = Min(Max(0.1, q), 10);
+                ss = Math.Max(0.1, ss);
+                q = Math.Min(Math.Max(0.1, q), 10);
                 var z0 = (d - prop.ad) * (d + prop.ad) * th * 0.25 / d;
-                var et = (prop.etq * Exp(-Pow(Min(1.7, z0 / 8000.0), 6)) + 1) * z0 / 1.7556e3;
-                var ett = Max(et, 1);
+                var et = (prop.etq * Math.Exp(-Math.Pow(Math.Min(1.7, z0 / 8000.0), 6)) + 1) * z0 / 1.7556e3;
+                var ett = Math.Max(et, 1);
                 h0 = (h0f(r1, ett) + h0f(r2, ett)) * 0.5;
-                h0 += Min(h0, (1.38 - Log(ett)) * Log(ss) * Log(q) * 0.49);
+                h0 += Math.Min(h0, (1.38 - Math.Log(ett)) * Math.Log(ss) * Math.Log(q) * 0.49);
                 h0 = Dim(h0, 0);
                 if (et < 1)
-                    h0 = et * h0 + (1 - et) * 4.343 * Log(Pow((1 + 1.4142 / r1) * (1 + 1.4142 / r2), 2) * (r1 + r2) / (r1 + r2 + 2.8284));
+                    h0 = et * h0 + (1 - et) * 4.343 * Math.Log(Math.Pow((1 + 1.4142 / r1) * (1 + 1.4142 / r2), 2) * (r1 + r2) / (r1 + r2 + 2.8284));
                 if (h0 > 15 && prop.h0s >= 0)
                     h0 = prop.h0s;
             }
             prop.h0s = h0;
             th = prop.tha + d * prop.gme;
-            return ahd(th * d) + 4.343 * Log(47.7 * prop.wn * Pow(th, 4)) - 0.1 * (prop.ens - 301) * Exp(-th * d / 40000.0) + h0;
+            return ahd(th * d) + 4.343 * Math.Log(47.7 * prop.wn * Math.Pow(th, 4)) - 0.1 * (prop.ens - 301) * Math.Exp(-th * d / 40000.0) + h0;
         }
 
         private static double qerfi(double q)
@@ -438,15 +426,14 @@ namespace LongleyRice
             const double d3 = 0.001308;
 
             var x = 0.5 - q;
-            var t = Max(0.5 - Abs(x), 0.000001);
-            t = Sqrt(-2 * Log(t));
+            var t = Math.Max(0.5 - Math.Abs(x), 0.000001);
+            t = Math.Sqrt(-2 * Math.Log(t));
             var v = t - ((c2 * t + c1) * t + c0) / (((d3 * t + d2) * t + d1) * t + 1);
             if (x < 0)
                 v = -v;
             return v;
         }
 
-        // ReSharper disable once InconsistentNaming
         private static void qlrps(double fmhz, double zsys, double en0, Polarization ipol, double eps, double sgm, prop_type prop)
         {
             const double gma = 157e-9;
@@ -454,10 +441,9 @@ namespace LongleyRice
             prop.ens = en0;
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (zsys != 0)
-                prop.ens *= Exp(-zsys / 9460.0);
-            prop.gme = gma * (1 - 0.04665 * Exp(prop.ens / 179.3));
+                prop.ens *= Math.Exp(-zsys / 9460.0);
+            prop.gme = gma * (1 - 0.04665 * Math.Exp(prop.ens / 179.3));
             var zq = new Complex(eps, 376.62 * sgm / prop.wn);
-            // ReSharper disable once InconsistentNaming
             var prop_zgnd = Complex.Sqrt(zq - 1);
             if (ipol != Polarization.Horizontal)
                 prop_zgnd = prop_zgnd / zq;
@@ -472,7 +458,7 @@ namespace LongleyRice
 
         private static void init_alos(prop_type prop)
         {
-            prop.wls = 0.021 / (0.021 + prop.wn * prop.dh / Max(10000, prop.dlsa));
+            prop.wls = 0.021 / (0.021 + prop.wn * prop.dh / Math.Max(10000, prop.dlsa));
         }
 
         /// <summary>
@@ -481,22 +467,21 @@ namespace LongleyRice
         /// <param name="d"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        // ReSharper disable once InconsistentNaming
         private double alos(double d, prop_type prop)
         {
-            var q = (1 - 0.8 * Exp(-d / 50000.0)) * prop.dh;
-            var s = 0.78 * q * Exp(-Pow(q / 16.0, 0.25));
+            var q = (1 - 0.8 * Math.Exp(-d / 50000.0)) * prop.dh;
+            var s = 0.78 * q * Math.Exp(-Math.Pow(q / 16.0, 0.25));
             q = prop.Transmitter.he + prop.Receiver.he;
-            var sps = q / Sqrt(d * d + q * q);
-            var r = (sps - prop.zgnd) / (sps + prop.zgnd) * Exp(-Min(10, prop.wn * s * sps));
+            var sps = q / Math.Sqrt(d * d + q * q);
+            var r = (sps - prop.zgnd) / (sps + prop.zgnd) * Math.Exp(-Math.Min(10, prop.wn * s * sps));
             q = abq_alos(r);
             if (q < 0.25 || q < sps)
-                r = r * Sqrt(sps / q);
+                r = r * Math.Sqrt(sps / q);
             var alosv = prop.emd * d + prop.aed;
             q = prop.wn * prop.Transmitter.he * prop.Receiver.he * 2 / d;
             if (q > 1.57)
                 q = 3.14 - 2.4649 / q;
-            return (-4.343 * Log(abq_alos(new Complex(Cos(q), -Sin(q)) + r)) - alosv) * prop.wls + alosv;
+            return (-4.343 * Math.Log(abq_alos(new Complex(Math.Cos(q), -Math.Sin(q)) + r)) - alosv) * prop.wls + alosv;
         }
 
 
@@ -514,11 +499,11 @@ namespace LongleyRice
                     else
                         q = 4;
                     if (antenna.hg < 5)
-                        q *= Sin(0.3141593 * antenna.hg);
-                    antenna.he = antenna.hg + (1 + q) * Exp(-Min(20, 2 * antenna.hg / Max(1e-3, prop.dh)));
+                        q *= Math.Sin(0.3141593 * antenna.hg);
+                    antenna.he = antenna.hg + (1 + q) * Math.Exp(-Math.Min(20, 2 * antenna.hg / Math.Max(1e-3, prop.dh)));
                 }
-                q = Sqrt(2 * antenna.he / prop.gme);
-                antenna.dl = q * Exp(-0.07 * Sqrt(prop.dh / Max(antenna.he, 5)));
+                q = Math.Sqrt(2 * antenna.he / prop.gme);
+                antenna.dl = q * Math.Exp(-0.07 * Math.Sqrt(prop.dh / Math.Max(antenna.he, 5)));
                 antenna.the = (0.65 * prop.dh * (q / antenna.dl - 1) - 2 * antenna.he) / q;
             }
             prop.mdp = ControlFlow.AreaBegin;
@@ -532,36 +517,35 @@ namespace LongleyRice
         /// </summary>
         /// <param name="d"></param>
         /// <param name="prop"></param>
-        // ReSharper disable once InconsistentNaming
         private void lrprop(double d, prop_type prop)  // PaulM_lrprop
         {
             if (prop.mdp != ControlFlow.AreaContinue)
             {
                 foreach (var antenna in prop.Antennae)
-                    antenna.dls = Sqrt(2 * antenna.he / prop.gme);
+                    antenna.dls = Math.Sqrt(2 * antenna.he / prop.gme);
                 prop.dlsa = prop.Transmitter.dls + prop.Receiver.dls;
                 prop.dla = prop.Transmitter.dl + prop.Receiver.dl;
-                prop.tha = Max(prop.Transmitter.the + prop.Receiver.the, -prop.dla * prop.gme);
+                prop.tha = Math.Max(prop.Transmitter.the + prop.Receiver.the, -prop.dla * prop.gme);
                 prop.wlos = false;
                 prop.wscat = false;
                 if (prop.wn < 0.838 || prop.wn > 210)
                 {
-                    prop.kwx = Max(prop.kwx, 1);
+                    prop.kwx = Math.Max(prop.kwx, 1);
                 }
                 foreach (var antenna in prop.Antennae)
                     if (antenna.hg < 1 || antenna.hg > 1000)
                     {
-                        prop.kwx = Max(prop.kwx, 1);
+                        prop.kwx = Math.Max(prop.kwx, 1);
                     }
                 foreach (var antenna in prop.Antennae)
-                    if (Abs(antenna.the) > 200e-3 || antenna.dl < 0.1 * antenna.dls ||
+                    if (Math.Abs(antenna.the) > 200e-3 || antenna.dl < 0.1 * antenna.dls ||
                         antenna.dl > 3 * antenna.dls)
                     {
-                        prop.kwx = Max(prop.kwx, 3);
+                        prop.kwx = Math.Max(prop.kwx, 3);
                     }
                 if (prop.ens < 250 || prop.ens > 400 ||
                     prop.gme < 75e-9 || prop.gme > 250e-9 ||
-                    prop.zgnd.Real <= Abs(prop.zgnd.Imaginary) ||
+                    prop.zgnd.Real <= Math.Abs(prop.zgnd.Imaginary) ||
                     prop.wn < 0.419 || prop.wn > 420)
                 {
                     prop.kwx = 4;
@@ -571,10 +555,10 @@ namespace LongleyRice
                     {
                         prop.kwx = 4;
                     }
-                prop.dmin = Abs(prop.Transmitter.he - prop.Receiver.he) / 200e-3;
+                prop.dmin = Math.Abs(prop.Transmitter.he - prop.Receiver.he) / 200e-3;
                 init_adiff(prop);
-                prop.xae = Pow(prop.wn * Pow(prop.gme, 2), -THIRD);
-                var d3 = Max(prop.dlsa, 1.3787 * prop.xae + prop.dla);
+                prop.xae = Math.Pow(prop.wn * Math.Pow(prop.gme, 2), -THIRD);
+                var d3 = Math.Max(prop.dlsa, 1.3787 * prop.xae + prop.dla);
                 var d4 = d3 + 2.7574 * prop.xae;
                 var a3 = adiff(d3, prop);
                 var a4 = adiff(d4, prop);
@@ -590,11 +574,11 @@ namespace LongleyRice
             {
                 if (prop.dist > 1000000)
                 {
-                    prop.kwx = Max(prop.kwx, 1);
+                    prop.kwx = Math.Max(prop.kwx, 1);
                 }
                 if (prop.dist < prop.dmin)
                 {
-                    prop.kwx = Max(prop.kwx, 3);
+                    prop.kwx = Math.Max(prop.kwx, 3);
                 }
                 if (prop.dist < 1000 || prop.dist > 2000000)
                 {
@@ -612,18 +596,18 @@ namespace LongleyRice
                     double d1;
                     if (prop.aed >= 0)
                     {
-                        d0 = Min(d0, 0.5 * prop.dla);
+                        d0 = Math.Min(d0, 0.5 * prop.dla);
                         d1 = d0 + 0.25 * (prop.dla - d0);
                     }
                     else
-                        d1 = Max(-prop.aed / prop.emd, 0.25 * prop.dla);
+                        d1 = Math.Max(-prop.aed / prop.emd, 0.25 * prop.dla);
                     var a1 = alos(d1, prop);
                     var wq = false;
                     if (d0 < d1)
                     {
                         var a0 = alos(d0, prop);
-                        var q = Log(d2 / d0);
-                        prop.ak2 = Max(0, ((d2 - d0) * (a1 - a0) - (d1 - d0) * (a2 - a0)) / ((d2 - d0) * Log(d1 / d0) - (d1 - d0) * q));
+                        var q = Math.Log(d2 / d0);
+                        prop.ak2 = Math.Max(0, ((d2 - d0) * (a1 - a0) - (d1 - d0) * (a2 - a0)) / ((d2 - d0) * Math.Log(d1 / d0) - (d1 - d0) * q));
                         wq = prop.aed >= 0 || prop.ak2 > 0;
                         if (wq)
                         {
@@ -646,11 +630,11 @@ namespace LongleyRice
                         if (prop.ak1 == 0)
                             prop.ak1 = prop.emd;
                     }
-                    prop.ael = a2 - prop.ak1 * d2 - prop.ak2 * Log(d2);
+                    prop.ael = a2 - prop.ak1 * d2 - prop.ak2 * Math.Log(d2);
                     prop.wlos = true;
                 }
                 if (prop.dist > 0)
-                    prop.aref = prop.ael + prop.ak1 * prop.dist + prop.ak2 * Log(prop.dist);
+                    prop.aref = prop.ael + prop.ak1 * prop.dist + prop.ak2 * Math.Log(prop.dist);
             }
             if (prop.dist <= 0 || prop.dist >= prop.dlsa)
             {
@@ -664,7 +648,7 @@ namespace LongleyRice
                     if (a5 < 1000)
                     {
                         prop.ems = (a6 - a5) / 200000.0;
-                        prop.dx = Max(prop.dlsa, Max(prop.dla + 0.3 * prop.xae * Log(47.7 * prop.wn), (a5 - prop.aed - prop.ems * d5) / (prop.emd - prop.ems)));
+                        prop.dx = Math.Max(prop.dlsa, Math.Max(prop.dla + 0.3 * prop.xae * Math.Log(47.7 * prop.wn), (a5 - prop.aed - prop.ems * d5) / (prop.emd - prop.ems)));
                         prop.aes = (prop.emd - prop.ems) * prop.dx + prop.aed;
                     }
                     else
@@ -680,12 +664,12 @@ namespace LongleyRice
                 else
                     prop.aref = prop.aed + prop.emd * prop.dist;
             }
-            prop.aref = Max(prop.aref, 0);
+            prop.aref = Math.Max(prop.aref, 0);
         }
 
         private static double curve(double c1, double c2, double x1, double x2, double x3, double de)
         {
-            return (c1 + c2 / (1 + Pow((de - x2) / x3, 2))) * Pow(de / x1, 2) / (1 + Pow(de / x1, 2));
+            return (c1 + c2 / (1 + Math.Pow((de - x2) / x3, 2))) * Math.Pow(de / x1, 2) / (1 + Math.Pow(de / x1, 2));
         }
 
         private class ClimateSettings
@@ -712,7 +696,6 @@ namespace LongleyRice
             { RadioClimate.MaritimeOverSea, new ClimateSettings (3.15, 857.9, 2222.0e3, 164.8e3, 116.3e3, 8.51, 169.8, 609.8e3, 119.9e3, 106.6e3, 8.43, 8.19, 136.2e3, 188.5e3, 122.9e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
         };
 
-        // ReSharper disable once InconsistentNaming
         private double avar(double zzt, double zzl, double zzc, prop_type prop)
         {
             const double rt = 7.8, rl = 24.0;
@@ -729,12 +712,12 @@ namespace LongleyRice
                     case Changes.VariabilityMode:
                         goto case Changes.Frequency;
                     case Changes.Frequency:
-                        q = Log(0.133 * prop.wn);
-                        prop.gm = prop.cs.cfm1 + prop.cs.cfm2 / (Pow(prop.cs.cfm3 * q, 2) + 1);
-                        prop.gp = prop.cs.cfp1 + prop.cs.cfp2 / (Pow(prop.cs.cfp3 * q, 2) + 1);
+                        q = Math.Log(0.133 * prop.wn);
+                        prop.gm = prop.cs.cfm1 + prop.cs.cfm2 / (Math.Pow(prop.cs.cfm3 * q, 2) + 1);
+                        prop.gp = prop.cs.cfp1 + prop.cs.cfp2 / (Math.Pow(prop.cs.cfp3 * q, 2) + 1);
                         goto case Changes.AntennaHeight;
                     case Changes.AntennaHeight:
-                        prop.dexa = Sqrt(18000000 * prop.Transmitter.he) + Sqrt(18000000 * prop.Receiver.he) + Pow(575.7e12 / prop.wn, THIRD);
+                        prop.dexa = Math.Sqrt(18000000 * prop.Transmitter.he) + Math.Sqrt(18000000 * prop.Receiver.he) + Math.Pow(575.7e12 / prop.wn, THIRD);
                         goto case Changes.Distance;
                     case Changes.Distance:
                         if (prop.dist < prop.dexa)
@@ -752,10 +735,10 @@ namespace LongleyRice
                     prop.sgl = 0;
                 else
                 {
-                    q = (1 - 0.8 * Exp(-prop.dist / 50000.0)) * prop.dh * prop.wn;
+                    q = (1 - 0.8 * Math.Exp(-prop.dist / 50000.0)) * prop.dh * prop.wn;
                     prop.sgl = 10 * q / (q + 13);
                 }
-                prop.vs0 = Pow(5 + 3 * Exp(-prop.de / 100000.0), 2);
+                prop.vs0 = Math.Pow(5 + 3 * Math.Exp(-prop.de / 100000.0), 2);
                 prop.lvar = Changes.None;
             }
             var zt = zzt;
@@ -774,9 +757,9 @@ namespace LongleyRice
                     zl = zt;
                     break;
             }
-            if (Abs(zt) > 3.1 || Abs(zl) > 3.1 || Abs(zc) > 3.1)
+            if (Math.Abs(zt) > 3.1 || Math.Abs(zl) > 3.1 || Math.Abs(zc) > 3.1)
             {
-                prop.kwx = Max(prop.kwx, 1);
+                prop.kwx = Math.Max(prop.kwx, 1);
             }
             if (zt < 0)
                 sgt = prop.sgtm;
@@ -784,24 +767,24 @@ namespace LongleyRice
                 sgt = prop.sgtp;
             else
                 sgt = prop.sgtd + prop.tgtd / zt;
-            var vs = prop.vs0 + Pow(sgt * zt, 2) / (rt + zc * zc) + Pow(prop.sgl * zl, 2) / (rl + zc * zc);
+            var vs = prop.vs0 + Math.Pow(sgt * zt, 2) / (rt + zc * zc) + Math.Pow(prop.sgl * zl, 2) / (rl + zc * zc);
             switch (prop.mdvar)
             {
                 case VariabilityMode.Single:
                     yr = 0;
-                    prop.sgc = Sqrt(sgt * sgt + prop.sgl * prop.sgl + vs);
+                    prop.sgc = Math.Sqrt(sgt * sgt + prop.sgl * prop.sgl + vs);
                     break;
                 case VariabilityMode.Individual:
                     yr = sgt * zt;
-                    prop.sgc = Sqrt(prop.sgl * prop.sgl + vs);
+                    prop.sgc = Math.Sqrt(prop.sgl * prop.sgl + vs);
                     break;
                 case VariabilityMode.Mobile:
-                    yr = Sqrt(sgt * sgt + prop.sgl * prop.sgl) * zt;
-                    prop.sgc = Sqrt(vs);
+                    yr = Math.Sqrt(sgt * sgt + prop.sgl * prop.sgl) * zt;
+                    prop.sgc = Math.Sqrt(vs);
                     break;
                 default:
                     yr = sgt * zt + prop.sgl * zl;
-                    prop.sgc = Sqrt(vs);
+                    prop.sgc = Math.Sqrt(vs);
                     break;
             }
             var avarv = prop.aref - prop.vmd - yr - prop.sgc * zc;
@@ -811,7 +794,6 @@ namespace LongleyRice
 
         }
 
-        // ReSharper disable once InconsistentNaming
         private static void hzns(Elevations pfl, prop_type prop)
         {
             var np = pfl.EndIndex;
@@ -854,7 +836,6 @@ namespace LongleyRice
             }
         }
 
-        // ReSharper disable once InconsistentNaming
         private static void z1sq1(Elevations z, double x1, double x2, out double z0, out double zn)
         {
             double xn = z.EndIndex;
@@ -895,7 +876,7 @@ namespace LongleyRice
 
             var m = 0;
             var n = nn;
-            var k = Min(Max(0, ir), n);
+            var k = Math.Min(Math.Max(0, ir), n);
             while (!done)
             {
                 if (goto10)
@@ -941,7 +922,6 @@ namespace LongleyRice
             return q;
         }
 
-        // ReSharper disable once InconsistentNaming
         private static double d1thx(Elevations pfl, double x1, double x2)
         {
             var np = pfl.EndIndex;
@@ -950,7 +930,7 @@ namespace LongleyRice
             if (xb - xa < 2)  // exit out
                 return 0;
             var ka = (int)(0.1 * (xb - xa + 8));
-            ka = Min(Max(4, ka), 25);
+            ka = Math.Min(Math.Max(4, ka), 25);
             var n = 10 * ka - 5;
             var kb = n - ka + 1;
             double sn = n - 1;
@@ -975,19 +955,17 @@ namespace LongleyRice
                 s.Points[j] -= xa;
                 xa = xa + xb;
             }
-            // ReSharper disable once InconsistentNaming
             var d1thxv = qtile(n - 1, s.Points, ka - 1) - qtile(n - 1, s.Points, kb - 1);
-            d1thxv /= 1 - 0.8 * Exp(-(x2 - x1) / 50000.0);
+            d1thxv /= 1 - 0.8 * Math.Exp(-(x2 - x1) / 50000.0);
             return d1thxv;
         }
 
-        // ReSharper disable once InconsistentNaming
         private void qlrpfl(Elevations pfl, RadioClimate klimx, VariabilityMode mdvarx, prop_type prop)
         {
             prop.dist = pfl.EndIndex * pfl.DeltaDistance;
             hzns(pfl, prop);
             foreach (var antenna in prop.Antennae)
-                antenna.xl = Min(15 * antenna.hg, 0.1 * antenna.dl);
+                antenna.xl = Math.Min(15 * antenna.hg, 0.1 * antenna.dl);
             prop.Receiver.xl = prop.dist - prop.Receiver.xl;
             prop.dh = d1thx(pfl, prop.Transmitter.xl, prop.Receiver.xl);
             if (prop.Transmitter.dl + prop.Receiver.dl > 1.5 * prop.dist)
@@ -996,23 +974,21 @@ namespace LongleyRice
                 prop.Transmitter.he = prop.Transmitter.hg + Dim(pfl.FirstPoint, za);
                 prop.Receiver.he = prop.Receiver.hg + Dim(pfl.LastPoint, zb);
                 foreach (var antenna in prop.Antennae)
-                    antenna.dl = Sqrt(2 * antenna.he / prop.gme) *
-                                Exp(-0.07 * Sqrt(prop.dh / Max(antenna.he, 5)));
+                    antenna.dl = Math.Sqrt(2 * antenna.he / prop.gme) * Math.Exp(-0.07 * Math.Sqrt(prop.dh / Math.Max(antenna.he, 5)));
                 var q = prop.Transmitter.dl + prop.Receiver.dl;
 
                 if (q <= prop.dist)
                 {
-                    q = Pow(prop.dist / q, 2);
+                    q = Math.Pow(prop.dist / q, 2);
                     foreach (var antenna in prop.Antennae)
                     {
                         antenna.he *= q;
-                        antenna.dl = Sqrt(2 * antenna.he / prop.gme) *
-                              Exp(-0.07 * Sqrt(prop.dh / Max(antenna.he, 5)));
+                        antenna.dl = Math.Sqrt(2 * antenna.he / prop.gme) * Math.Exp(-0.07 * Math.Sqrt(prop.dh / Math.Max(antenna.he, 5)));
                     }
                 }
                 foreach (var antenna in prop.Antennae)
                 {
-                    q = Sqrt(2 * antenna.he / prop.gme);
+                    q = Math.Sqrt(2 * antenna.he / prop.gme);
                     antenna.the = (0.65 * prop.dh * (q / antenna.dl - 1) - 2 * antenna.he) / q;
                 }
             }
@@ -1061,7 +1037,7 @@ namespace LongleyRice
             var e = new Elevations(elev);
             qlrps(frq_mhz, e.Points.Average(), eno_ns_surfref, pol, eps_dielect, sgm_conductivity, prop);
             qlrpfl(e, prop.klim, prop.mdvar, prop);
-            var fs = 32.45 + 20 * Log10(frq_mhz) + 20 * Log10(prop.dist / 1000.0);
+            var fs = 32.45 + 20 * Math.Log10(frq_mhz) + 20 * Math.Log10(prop.dist / 1000.0);
             deltaH = prop.dh;
             propmode = GetPropMode(prop);
             dbloss = avar(qerfi(timepct), qerfi(locpct), qerfi(confpct), prop) + fs;      //avar(time,location,confidence)
@@ -1124,7 +1100,7 @@ namespace LongleyRice
             if (prop.lvar < Changes.Distance)
                 prop.lvar = Changes.Distance;
             lrprop(dist_km * 1000, prop);
-            var fs = 32.45 + 20 * Log10(frq_mhz) + 20 * Log10(prop.dist / 1000.0);
+            var fs = 32.45 + 20 * Math.Log10(frq_mhz) + 20 * Math.Log10(prop.dist / 1000.0);
             var xlb = fs + avar(qerfi(pctTime), qerfi(pctLoc), qerfi(pctConf), prop);
             dbloss = xlb;
             errnum = prop.kwx;
