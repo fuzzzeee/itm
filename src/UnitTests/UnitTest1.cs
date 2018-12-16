@@ -49,6 +49,7 @@ namespace UnitTests
                     out var dbloss0, out var propMode0, out var deltaH0, out var errnum0);
                 times[0].Stop();
 
+#if DEBUG
                 itm.UseOriginal = true;
                 times[1].Start();
                 itm.PointToPoint(p);
@@ -56,25 +57,21 @@ namespace UnitTests
 
                 results.Add(p);
 
-                Assert.AreEqual(Math.Round(dbloss0, 10), Math.Round(p.DbLoss, 10)); // fractional precision variance after 10 decimal places
+                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
                 Assert.AreEqual(propMode0, (int)p.PropMode);
-                Assert.AreEqual(Math.Round(deltaH0, 10), Math.Round(p.DeltaH, 10)); // fractional precision variance after 10 decimal places
+                Assert.AreEqual(deltaH0, p.DeltaH, 0.00000001);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
 
-                var dbloss1 = p.DbLoss;
-                var propMode1 = p.PropMode;
-                var deltaH1 = p.DeltaH;
-                var errnum1 = p.ErrorIndicator;
-
                 itm.UseOriginal = false;
+#endif
                 times[2].Start();
                 itm.PointToPoint(p);
                 times[2].Stop();
 
-                Assert.AreEqual(dbloss1, p.DbLoss);
-                Assert.AreEqual((int)propMode1, (int)p.PropMode);
-                Assert.AreEqual(deltaH1, p.DeltaH);
-                Assert.AreEqual(errnum1, p.ErrorIndicator);
+                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
+                Assert.AreEqual((int)propMode0, (int)p.PropMode);
+                Assert.AreEqual(deltaH0, p.DeltaH, 0.00000001);
+                Assert.AreEqual(errnum0, p.ErrorIndicator);
             }
 
             foreach (var p in GetAreaModels())
@@ -87,24 +84,23 @@ namespace UnitTests
                     out var errnum0);
                 times[0].Stop();
 
+#if DEBUG
                 itm.UseOriginal = true;
                 times[1].Start();
                 itm.Area(p);
                 times[1].Stop();
 
-                Assert.AreEqual(Math.Round(dbloss0, 8), Math.Round(p.DbLoss, 8));
+                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
 
-                var dbloss1 = p.DbLoss;
-                var errnum1 = p.ErrorIndicator;
-
                 itm.UseOriginal = false;
+#endif
                 times[2].Start();
                 itm.Area(p);
                 times[2].Stop();
 
-                Assert.AreEqual(dbloss1, p.DbLoss);
-                Assert.AreEqual(errnum1, p.ErrorIndicator);
+                Assert.AreEqual(dbloss0, p.DbLoss, 0.00000001);
+                Assert.AreEqual(errnum0, p.ErrorIndicator);
             }
 
             TestContext.WriteLine($"C++ = {times[0].Elapsed}, C# Original = {times[1].Elapsed}, C# Refactored = {times[2].Elapsed}");
