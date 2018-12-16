@@ -6,10 +6,12 @@ namespace LongleyRice
 {
     public class IrregularTerrainModel
     {
+#if DEBUG
         /// <summary>
         /// Only used for unit testing. Do not set to true unless you're testing or want the algorithm to run slower
         /// </summary>
         public bool UseOriginal { get; set; }
+#endif
 
         public void PointToPoint(PointToPointModel model)
         {
@@ -17,6 +19,7 @@ namespace LongleyRice
             e[0] = model.Elevations.Length - 1;
             e[1] = model.Distance / e[0];
             model.Elevations.CopyTo(e, 2);
+#if DEBUG
             if (UseOriginal)
             {
                 var itm = new Original();
@@ -29,6 +32,7 @@ namespace LongleyRice
                 model.ErrorIndicator = errnum;
             }
             else
+#endif
             {
                 var itm = new Refactored();
                 itm.point_to_pointMDH(e, model.Transmitter.Height, model.Receiver.Height, model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency,
@@ -43,6 +47,7 @@ namespace LongleyRice
 
         public void Area(AreaModel model)
         {
+#if DEBUG
             if (UseOriginal)
             {
                 var itm = new Original();
@@ -53,6 +58,7 @@ namespace LongleyRice
                 model.ErrorIndicator = errnum;
             }
             else
+#endif
             {
                 var itm = new Refactored();
                 itm.area(model.Variability.Mode, model.DeltaH, model.Transmitter.Height, model.Receiver.Height, model.Distance, model.Transmitter.SiteCriteria, model.Receiver.SiteCriteria,
