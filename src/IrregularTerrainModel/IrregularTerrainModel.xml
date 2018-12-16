@@ -1,0 +1,336 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>IrregularTerrainModel</name>
+    </assembly>
+    <members>
+        <member name="P:LongleyRice.IrregularTerrainModel.UseOriginal">
+            <summary>
+            Only used for unit testing. Do not set to true unless you're testing or want the algorithm to run slower
+            </summary>
+        </member>
+        <member name="P:LongleyRice.Model.GroundQuality">
+            <summary>
+            Specifies the ground quality. This can be used instead of <see cref="P:LongleyRice.Model.GroundConductivity"/> and <see cref="P:LongleyRice.Model.GroundDielectric"/>
+            </summary>
+        </member>
+        <member name="P:LongleyRice.Model.Frequency">
+            <summary>
+            Frequency in Megahertz
+            </summary>
+        </member>
+        <member name="P:LongleyRice.Model.GroundDielectric">
+            <summary>
+            Dielectric Constant of Ground
+            </summary>
+        </member>
+        <member name="P:LongleyRice.Model.GroundConductivity">
+            <summary>
+            Conductivity of Ground
+            </summary>
+        </member>
+        <member name="M:LongleyRice.AreaModel.#ctor(System.Double)">
+            <summary>
+            Creates a new <see cref="T:LongleyRice.AreaModel"/>
+            </summary>
+            <param name="distance">Distance in kilometers</param>
+        </member>
+        <member name="P:LongleyRice.AreaModel.Distance">
+            <summary>
+            Distance in kilometers
+            </summary>
+        </member>
+        <member name="P:LongleyRice.AreaModel.DeltaH">
+            <inheritdoc />
+        </member>
+        <member name="M:LongleyRice.PointToPointModel.#ctor(System.Double[],System.Double)">
+            <summary>
+            Creates a new <see cref="T:LongleyRice.PointToPointModel"/>
+            </summary>
+            <param name="elevations">The terrain heights between transmitter and receiver in meters</param>
+            <param name="distance">The distance between transmitter and receiver in meters</param>
+        </member>
+        <member name="P:LongleyRice.PointToPointModel.Elevations">
+            <summary>
+            The terrain heights between transmitter and receiver in meters
+            </summary>
+        </member>
+        <member name="P:LongleyRice.PointToPointModel.Distance">
+            <summary>
+            The distance between transmitter and receiver in meters
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.Antenna.hg">
+            <summary>
+            Structural height
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.Antenna.he">
+            <summary>
+            Effective height
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.Antenna.dl">
+            <summary>
+            Horizon distance
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.Antenna.the">
+            <summary>
+            Horizon elevation angle
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.Antenna.dls">
+            <summary>
+            Smooth earth horizon distance
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.aref">
+            <summary>
+            Reference attenuation
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.dist">
+            <summary>
+            Distance
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.wn">
+            <summary>
+            Wave number (radio frequency)
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.dh">
+            <summary>
+            Terrain irregularity parameter
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.ens">
+            <summary>
+            Surface refractivity
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.gme">
+            <summary>
+            Earth's effective curvature
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.zgnd">
+            <summary>
+            Surface transfer impedance of the ground
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.kwx">
+            <summary>
+            Error indicator
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.mdp">
+            <summary>
+            Controlling mode
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.sgc">
+            <summary>
+            Standard deviation of situation variability (with what confidence will a threshold signal level be exceeded)
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.lvar">
+            <summary>
+            A control switch
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.mdvar">
+            <summary>
+            Desired mode of variability
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.klim">
+            <summary>
+            Climate indicator
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.dlsa">
+            <summary>
+            Line-of-sight distance
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.dx">
+            <summary>
+            Scatter distance
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.ael">
+            <summary>
+            Line-of-sight coefficient
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.ak1">
+            <summary>
+            Line-of-sight coefficient
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.ak2">
+            <summary>
+            Line-of-sight coefficient
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.aed">
+            <summary>
+            Diffraction coefficient
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.emd">
+            <summary>
+            Diffraction coefficient
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.aes">
+            <summary>
+            Scatter coefficient
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.ems">
+            <summary>
+            Scatter coefficient
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.dla">
+            <summary>
+            Total horizon distance
+            </summary>
+        </member>
+        <member name="F:LongleyRice.Refactored.prop_type.tha">
+            <summary>
+            Total bending angle
+            </summary>
+        </member>
+        <member name="M:LongleyRice.Refactored.Dim(System.Double,System.Double)">
+            <summary>
+            This performs the FORTRAN DIM function.
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+            <returns>x-y if x is greater than y, otherwise 0</returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.aknfe(System.Double)">
+            <summary>
+            The attenuation due to a single knife edge - the Fresnel integral (in decibels) as a function of <paramref name="v2"/>
+            </summary>
+            <param name="v2"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.fht(System.Double,System.Double)">
+            <summary>
+            The height-gain over a smooth spherical earth - to be used in the "three radii" method.
+            </summary>
+            <param name="x"></param>
+            <param name="pk"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.h0f(System.Double,System.Double)">
+            <summary>
+            H01 function for scatter fields
+            </summary>
+            <param name="r"></param>
+            <param name="et"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.ahd(System.Double)">
+            <summary>
+            The F(0d) function for scatter fields
+            </summary>
+            <param name="td"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.adiff(System.Double,LongleyRice.Refactored.prop_type)">
+            <summary>
+            Finds the "diffraction attenuation" at the distance <paramref name="d"/>
+            </summary>
+            <remarks>
+            It uses a convex combination of smooth earth diffraction and double knife-edge diffraction
+            </remarks>
+            <param name="d"></param>
+            <param name="prop"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.ascat(System.Double,LongleyRice.Refactored.prop_type)">
+            <summary>
+            Finds the "scatter attenuation" at the distance <paramref name="d"/>. It uses an approximation to the methods of NBS TN101 with checks for inadmissable situations
+            </summary>
+            <param name="d"></param>
+            <param name="prop"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.alos(System.Double,LongleyRice.Refactored.prop_type)">
+            <summary>
+            Finds the "line-of-sight" attenuation at the distance <paramref name="d"/> It uses a convex combination of plane earth fields and diffracted fields
+            </summary>
+            <param name="d"></param>
+            <param name="prop"></param>
+            <returns></returns>
+        </member>
+        <member name="M:LongleyRice.Refactored.lrprop(System.Double,LongleyRice.Refactored.prop_type)">
+            <summary>
+            The Longley-Rice propagation program. This is the basic program; it returns the reference attenuation
+            </summary>
+            <param name="d"></param>
+            <param name="prop"></param>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.Equatorial">
+            <summary>
+            Congo
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.ContinentalSubtropical">
+            <summary>
+            Sudan
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.MaritimeSubtropical">
+            <summary>
+            West Coast of Africa
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.Desert">
+            <summary>
+            Sahara
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.ContinentalTemperate">
+            <summary>
+            Use for Avg. Atmospheric Conditions
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.MaritimeOverLand">
+            <summary>
+            UK and Continental West Coast
+            </summary>
+        </member>
+        <member name="F:LongleyRice.TerrainType.Hills">
+            <summary>
+            Use for Avg. Terrain
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Single">
+            <summary>
+            Confidence is Time/Situation/Location, Time, Location not used
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Individual">
+            <summary>
+            Time is Situation/Location, Confidence is Confidence, Location not used
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Mobile">
+            <summary>
+            Time is Time/Location (Reliability), Confidence is Confidence, Location not used
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Broadcast">
+            <summary>
+            Time is Time, Location is Location, Confidence is Confidence
+            </summary>
+        </member>
+    </members>
+</doc>
