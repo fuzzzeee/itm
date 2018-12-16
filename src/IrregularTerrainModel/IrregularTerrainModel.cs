@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -63,9 +63,10 @@ namespace LongleyRice
                 var itm = new Refactored();
                 itm.area(model.Variability.Mode, model.DeltaH, model.Transmitter.Height, model.Receiver.Height, model.Distance, model.Transmitter.SiteCriteria, model.Receiver.SiteCriteria,
                     model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency, model.Climate, model.Polarization,
-                    model.Variability.Time, model.Variability.Location, model.Variability.Confidence, out var dbloss, out var errnum);
+                    model.Variability.Time, model.Variability.Location, model.Variability.Confidence, out var dbloss, out var propmode, out var errnum);
                 model.DbLoss = dbloss;
                 model.ErrorIndicator = errnum;
+                model.PropMode = propmode;
             }
         }
     }
@@ -316,6 +317,8 @@ namespace LongleyRice
             }
         }
 
+        public PropMode PropMode { get; internal set; }
+
         public Antenna Transmitter { get; } = new Antenna { Height = 3.3 };
         public Antenna Receiver { get; } = new Antenna { Height = 1.3 };
 
@@ -441,8 +444,6 @@ namespace LongleyRice
                 }
             }
         }
-
-        public PropMode PropMode { get; internal set; }
     }
 
     public class Variability : INotifyPropertyChanged

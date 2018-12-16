@@ -271,7 +271,7 @@ namespace LongleyRice
         private static double h0f(double r, double et)
         {
             double q;
-            var it = (int) et;
+            var it = (int)et;
             if (it <= 0)
             {
                 it = 1;
@@ -1076,7 +1076,7 @@ namespace LongleyRice
                   double dist_km, SiteCriteria TSiteCriteria, SiteCriteria RSiteCriteria,
                   double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
                   double frq_mhz, RadioClimate radio_climate, Polarization pol, double pctTime, double pctLoc,
-                  double pctConf, out double dbloss, out int errnum)
+                  double pctConf, out double dbloss, out PropMode propmode, out int errnum)
         {
             // pctTime, pctLoc, pctConf: .01 to .99
             // errnum: 0- No Error.
@@ -1087,13 +1087,10 @@ namespace LongleyRice
             //                     Results are probably invalid.
             //         Other-  Warning: Some parameters are out of range.
             //                          Results are probably invalid.
-            var prop = new prop_type();
-            prop.dh = deltaH;
+            var prop = new prop_type { dh = deltaH, klim = radio_climate, ens = eno_ns_surfref };
             prop.Transmitter.hg = tht_m;
-            prop.Receiver.hg = rht_m;
-            prop.klim = radio_climate;
-            prop.ens = eno_ns_surfref;
             prop.Transmitter.kst = TSiteCriteria;
+            prop.Receiver.hg = rht_m;
             prop.Receiver.kst = RSiteCriteria;
             qlrps(frq_mhz, 0, eno_ns_surfref, pol, eps_dielect, sgm_conductivity, prop);
             qlra(prop.klim, ModVar, prop);
@@ -1104,6 +1101,7 @@ namespace LongleyRice
             var xlb = fs + avar(qerfi(pctTime), qerfi(pctLoc), qerfi(pctConf), prop);
             dbloss = xlb;
             errnum = prop.kwx;
+            propmode = GetPropMode(prop);
         }
 
         private enum ControlFlow
