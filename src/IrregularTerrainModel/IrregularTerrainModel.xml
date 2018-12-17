@@ -4,6 +4,11 @@
         <name>IrregularTerrainModel</name>
     </assembly>
     <members>
+        <member name="P:LongleyRice.IrregularTerrainModel.UseOriginal">
+            <summary>
+            Only used for unit testing. Do not set to true unless you're testing or want the algorithm to run slower
+            </summary>
+        </member>
         <member name="P:LongleyRice.Antenna.Height">
             <summary>
             The antenna height in meters
@@ -69,6 +74,61 @@
         <member name="P:LongleyRice.PointToPointModel.Distance">
             <summary>
             The distance between transmitter and receiver in meters
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.Equatorial">
+            <summary>
+            Congo
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.ContinentalSubtropical">
+            <summary>
+            Sudan
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.MaritimeSubtropical">
+            <summary>
+            West Coast of Africa
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.Desert">
+            <summary>
+            Sahara
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.ContinentalTemperate">
+            <summary>
+            Use for Avg. Atmospheric Conditions
+            </summary>
+        </member>
+        <member name="F:LongleyRice.RadioClimate.MaritimeOverLand">
+            <summary>
+            UK and Continental West Coast
+            </summary>
+        </member>
+        <member name="F:LongleyRice.TerrainType.Hills">
+            <summary>
+            Use for Avg. Terrain
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Single">
+            <summary>
+            Confidence is Time/Situation/Location, Time, Location not used
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Individual">
+            <summary>
+            Time is Situation/Location, Confidence is Confidence, Location not used
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Mobile">
+            <summary>
+            Time is Time/Location (Reliability), Confidence is Confidence, Location not used
+            </summary>
+        </member>
+        <member name="F:LongleyRice.VariabilityMode.Broadcast">
+            <summary>
+            Time is Time, Location is Location, Confidence is Confidence
             </summary>
         </member>
         <member name="F:LongleyRice.Refactored.Antenna.hg">
@@ -287,61 +347,6 @@
             </summary>
             <param name="d"></param>
             <param name="prop"></param>
-        </member>
-        <member name="F:LongleyRice.RadioClimate.Equatorial">
-            <summary>
-            Congo
-            </summary>
-        </member>
-        <member name="F:LongleyRice.RadioClimate.ContinentalSubtropical">
-            <summary>
-            Sudan
-            </summary>
-        </member>
-        <member name="F:LongleyRice.RadioClimate.MaritimeSubtropical">
-            <summary>
-            West Coast of Africa
-            </summary>
-        </member>
-        <member name="F:LongleyRice.RadioClimate.Desert">
-            <summary>
-            Sahara
-            </summary>
-        </member>
-        <member name="F:LongleyRice.RadioClimate.ContinentalTemperate">
-            <summary>
-            Use for Avg. Atmospheric Conditions
-            </summary>
-        </member>
-        <member name="F:LongleyRice.RadioClimate.MaritimeOverLand">
-            <summary>
-            UK and Continental West Coast
-            </summary>
-        </member>
-        <member name="F:LongleyRice.TerrainType.Hills">
-            <summary>
-            Use for Avg. Terrain
-            </summary>
-        </member>
-        <member name="F:LongleyRice.VariabilityMode.Single">
-            <summary>
-            Confidence is Time/Situation/Location, Time, Location not used
-            </summary>
-        </member>
-        <member name="F:LongleyRice.VariabilityMode.Individual">
-            <summary>
-            Time is Situation/Location, Confidence is Confidence, Location not used
-            </summary>
-        </member>
-        <member name="F:LongleyRice.VariabilityMode.Mobile">
-            <summary>
-            Time is Time/Location (Reliability), Confidence is Confidence, Location not used
-            </summary>
-        </member>
-        <member name="F:LongleyRice.VariabilityMode.Broadcast">
-            <summary>
-            Time is Time, Location is Location, Confidence is Confidence
-            </summary>
         </member>
     </members>
 </doc>

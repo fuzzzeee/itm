@@ -518,4 +518,97 @@ namespace LongleyRice
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
+    public enum Polarization
+    {
+        Horizontal = 0,
+        Vertical = 1,
+    }
+
+    public enum SiteCriteria
+    {
+        Random = 0,
+        Careful = 1,
+        VeryCareful = 2,
+    }
+
+    public enum RadioClimate
+    {
+        /// <summary>
+        /// Congo
+        /// </summary>
+        Equatorial = 1,
+        /// <summary>
+        /// Sudan
+        /// </summary>
+        ContinentalSubtropical = 2,
+        /// <summary>
+        /// West Coast of Africa
+        /// </summary>
+        MaritimeSubtropical = 3,
+        /// <summary>
+        /// Sahara
+        /// </summary>
+        Desert = 4,
+        /// <summary>
+        /// Use for Avg. Atmospheric Conditions
+        /// </summary>
+        ContinentalTemperate = 5,
+        /// <summary>
+        /// UK and Continental West Coast
+        /// </summary>
+        MaritimeOverLand = 6,
+        MaritimeOverSea = 7,
+    }
+
+    public enum GroundQuality
+    {
+        Average,
+        Poor,
+        Good,
+        FreshWater,
+        SeaWater,
+    }
+
+    public enum TerrainType
+    {
+        Flat = 0,
+        Plains = 30,
+        /// <summary>
+        /// Use for Avg. Terrain
+        /// </summary>
+        Hills = 90,
+        Mountains = 200,
+        RuggedMountains = 500,
+    }
+
+    public enum VariabilityMode
+    {
+        /// <summary>
+        /// Confidence is Time/Situation/Location, Time, Location not used
+        /// </summary>
+        Single = 0,
+        /// <summary>
+        /// Time is Situation/Location, Confidence is Confidence, Location not used
+        /// </summary>
+        Individual = 1,
+        /// <summary>
+        /// Time is Time/Location (Reliability), Confidence is Confidence, Location not used
+        /// </summary>
+        Mobile = 2,
+        /// <summary>
+        /// Time is Time, Location is Location, Confidence is Confidence
+        /// </summary>
+        Broadcast = 3,
+    }
+
+    [Flags]
+    public enum PropMode
+    {
+        LineOfSight = 0,
+        SingleHorizon = 4,
+        DoubleHorizon = 8,
+        DiffractionDominant = 1,
+        TroposcatterDominant = 2,
+    }
 }
