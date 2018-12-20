@@ -24,7 +24,7 @@ namespace LongleyRice
             {
                 var itm = new Original();
                 itm.point_to_pointMDH(e, model.Transmitter.Height, model.Receiver.Height, model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency,
-                    (int)model.Climate, (int)model.Polarization, model.Variability.Time, model.Variability.Location, model.Variability.Confidence,
+                    (int)model.Climate, (int)model.Polarization, (int)model.Variability.Mode, model.Variability.Time, model.Variability.Location, model.Variability.Confidence,
                     out var dbloss, out var propmode, out var deltaH, out var errnum);
                 model.DbLoss = dbloss;
                 model.PropMode = (PropMode)propmode;
@@ -36,7 +36,7 @@ namespace LongleyRice
             {
                 var itm = new Refactored();
                 itm.point_to_pointMDH(e, model.Transmitter.Height, model.Receiver.Height, model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency,
-                    model.Climate, model.Polarization, model.Variability.Time, model.Variability.Location, model.Variability.Confidence,
+                    model.Climate, model.Polarization, model.Variability.Mode, model.Variability.Time, model.Variability.Location, model.Variability.Confidence,
                     out var dbloss, out var propmode, out var deltaH, out var errnum);
                 model.DbLoss = dbloss;
                 model.PropMode = propmode;

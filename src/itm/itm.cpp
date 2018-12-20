@@ -1088,7 +1088,7 @@ void DllExport _stdcall point_to_point(double elev[], double tht_m, double rht_m
 extern "C" {
 	void DllExport _stdcall point_to_pointMDH(double elev[], double tht_m, double rht_m,
 		double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
-		double frq_mhz, int radio_climate, int pol, double timepct, double locpct, double confpct,
+		double frq_mhz, int radio_climate, int pol, int mdvar, double timepct, double locpct, double confpct,
 		double &dbloss, int &propmode, double &deltaH, int &errnum)
 		// pol: 0-Horizontal, 1-Vertical
 		// radio_climate: 1-Equatorial, 2-Continental Subtropical, 3-Maritime Tropical,
@@ -1148,7 +1148,7 @@ extern "C" {
 			zsys /= (jb - ja + 1);
 			q = eno;
 		}
-		propv.mdvar = 12;
+		propv.mdvar = 10 + mdvar;
 		qlrps(frq_mhz, zsys, q, pol, eps_dielect, sgm_conductivity, prop);
 		qlrpfl(elev, propv.klim, propv.mdvar, prop, propa, propv);
 		fs = 32.45 + 20.0 * log10(frq_mhz) + 20.0 * log10(prop.dist / 1000.0);

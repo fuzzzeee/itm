@@ -14,7 +14,7 @@ namespace UnitTests
         [DllImport("itm.dll")]
         private static extern void point_to_pointMDH(double[] elev, double tht_m, double rht_m,
             double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
-            double frq_mhz, int radio_climate, int pol, double timepct, double locpct, double confpct,
+            double frq_mhz, int radio_climate, int pol, int mdvar, double timepct, double locpct, double confpct,
             out double dbloss, out int propmode, out double deltaH, out int errnum);
 
         [DllImport("itm.dll")]
@@ -46,7 +46,7 @@ namespace UnitTests
                 e[1] = p.Distance / e[0];
                 p.Elevations.CopyTo(e, 2);
                 times[0].Start();
-                point_to_pointMDH(e, p.Transmitter.Height, p.Receiver.Height, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency, (int)p.Climate, (int)p.Polarization, p.Variability.Time, p.Variability.Location, p.Variability.Confidence,
+                point_to_pointMDH(e, p.Transmitter.Height, p.Receiver.Height, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency, (int)p.Climate, (int)p.Polarization, (int)p.Variability.Mode, p.Variability.Time, p.Variability.Location, p.Variability.Confidence,
                     out var dbloss0, out var propMode0, out var deltaH0, out var errnum0);
                 times[0].Stop();
 
@@ -123,27 +123,31 @@ namespace UnitTests
                 {
                     foreach (var frequency in new[] { 50, 107.7, 500, 915, 1000, 2400, 5000 })
                     {
-                        foreach (var percent in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
+                        foreach (VariabilityMode mode in Enum.GetValues(typeof(VariabilityMode)))
                         {
-                            foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
+                            foreach (var percent in new[] {0.01, 0.1, 0.5, 0.9, 0.99})
                             {
-                                foreach (Polarization polarization in Enum.GetValues(typeof(Polarization)))
+                                foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
                                 {
-                                    foreach (GroundQuality ground in Enum.GetValues(typeof(GroundQuality)))
+                                    foreach (Polarization polarization in Enum.GetValues(typeof(Polarization)))
                                     {
-                                        var model = new PointToPointModel(elevations, 2000)
+                                        foreach (GroundQuality ground in Enum.GetValues(typeof(GroundQuality)))
                                         {
-                                            Climate = climate,
-                                            GroundQuality = ground,
-                                            Frequency = frequency,
-                                            Polarization = polarization
-                                        };
-                                        model.Variability.Confidence = Math.Max(0.01, percent * 0.9);
-                                        model.Variability.Location = percent;
-                                        model.Variability.Time = Math.Max(0.01, percent * 0.8);
-                                        model.Transmitter.Height = height;
-                                        model.Receiver.Height = height * 0.8;
-                                        yield return model;
+                                            var model = new PointToPointModel(elevations, 2000)
+                                            {
+                                                Climate = climate,
+                                                GroundQuality = ground,
+                                                Frequency = frequency,
+                                                Polarization = polarization
+                                            };
+                                            model.Variability.Mode = mode;
+                                            model.Variability.Confidence = Math.Max(0.01, percent * 0.9);
+                                            model.Variability.Location = percent;
+                                            model.Variability.Time = Math.Max(0.01, percent * 0.8);
+                                            model.Transmitter.Height = height;
+                                            model.Receiver.Height = height * 0.8;
+                                            yield return model;
+                                        }
                                     }
                                 }
                             }

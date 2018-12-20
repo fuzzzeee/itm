@@ -1012,7 +1012,7 @@ namespace LongleyRice
 
         public void point_to_pointMDH(double[] elev, double tht_m, double rht_m,
                   double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
-                  double frq_mhz, RadioClimate radio_climate, Polarization pol, double timepct, double locpct, double confpct,
+                  double frq_mhz, RadioClimate radio_climate, Polarization pol, VariabilityMode mdvar, double timepct, double locpct, double confpct,
                   out double dbloss, out PropMode propmode, out double deltaH, out int errnum)
         // timepct, locpct, confpct: .01 to .99
         // elev[]: [num points - 1], [delta dist(meters)], [height(meters) point 1], ..., [height(meters) point n]
@@ -1031,7 +1031,7 @@ namespace LongleyRice
                 lvar = Changes.All,
                 mdp = ControlFlow.PointToPoint,
                 w1 = true, // possible bugfix: original embedded this value in mdvar
-                mdvar = VariabilityMode.Broadcast // bugfix: original used 'mobile'
+                mdvar = mdvar // bugfix: original used 'mobile'
             };
             prop.Transmitter.hg = tht_m;
             prop.Receiver.hg = rht_m;

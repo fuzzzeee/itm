@@ -1104,7 +1104,7 @@ namespace LongleyRice
 
         public void point_to_pointMDH(double[] elev, double tht_m, double rht_m,
                   double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
-                  double frq_mhz, int radio_climate, int pol, double timepct, double locpct, double confpct,
+                  double frq_mhz, int radio_climate, int pol, int mdvar, double timepct, double locpct, double confpct,
                   out double dbloss, out int propmode, out double deltaH, out int errnum)
         // pol: 0-Horizontal, 1-Vertical
         // radio_climate: 1-Equatorial, 2-Continental Subtropical, 3-Maritime Tropical,
@@ -1164,7 +1164,7 @@ namespace LongleyRice
                 zsys /= (jb - ja + 1);
                 q = eno;
             }
-            propv.mdvar = 12;
+            propv.mdvar = mdvar + 10;
             qlrps(frq_mhz, zsys, q, pol, eps_dielect, sgm_conductivity, prop);
             qlrpfl(elev, propv.klim, propv.mdvar, prop, propa, propv);
             fs = 32.45 + 20.0 * Log10(frq_mhz) + 20.0 * Log10(prop.dist / 1000.0);
