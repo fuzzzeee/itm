@@ -363,7 +363,7 @@ namespace LongleyRice
             return ar * wd + (1 - wd) * adiffv + prop.afo;
         }
 
-        private void init_ascat(prop_type prop)
+        private static void init_ascat(prop_type prop)
         {
             prop.ad = prop.Transmitter.dl - prop.Receiver.dl;
             prop.rr = prop.Receiver.he / prop.Transmitter.he;
@@ -467,7 +467,7 @@ namespace LongleyRice
         /// <param name="d"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        private double alos(double d, prop_type prop)
+        private static double alos(double d, prop_type prop)
         {
             var q = (1 - 0.8 * Math.Exp(-d / 50000.0)) * prop.dh;
             var s = 0.78 * q * Math.Exp(-Math.Pow(q / 16.0, 0.25));

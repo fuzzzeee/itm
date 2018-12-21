@@ -11,6 +11,7 @@
     <Product>Irregular Terrain Model (ITM) (Longley-Rice) (20 MHz – 20 GHz)</Product>
     <RepositoryUrl>https://github.com/fuzzzeee/itm</RepositoryUrl>
     <RootNamespace>LongleyRice</RootNamespace>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
