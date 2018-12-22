@@ -313,7 +313,7 @@ namespace LongleyRice
             return _ahd_a[i] + _ahd_b[i] * td + _ahd_c[i] * Math.Log(td);
         }
 
-        private void init_adiff(prop_type prop)
+        private static void init_adiff(prop_type prop)
         {
             var q = prop.Transmitter.hg * prop.Receiver.hg;
             prop.qk = prop.Transmitter.he * prop.Receiver.he - q;
@@ -347,7 +347,7 @@ namespace LongleyRice
         /// <param name="d"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        private double adiff(double d, prop_type prop)
+        private static double adiff(double d, prop_type prop)
         {
             var th = prop.tha + d * prop.gme;
             var ds = d - prop.dla;
@@ -382,7 +382,7 @@ namespace LongleyRice
         /// <param name="d"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
-        private double ascat(double d, prop_type prop)
+        private static double ascat(double d, prop_type prop)
         {
             double th;
             double h0;
@@ -517,7 +517,7 @@ namespace LongleyRice
         /// </summary>
         /// <param name="d"></param>
         /// <param name="prop"></param>
-        private void lrprop(double d, prop_type prop)  // PaulM_lrprop
+        private static void lrprop(double d, prop_type prop)  // PaulM_lrprop
         {
             if (prop.mdp != ControlFlow.AreaContinue)
             {
@@ -696,7 +696,7 @@ namespace LongleyRice
             { RadioClimate.MaritimeOverSea, new ClimateSettings (3.15, 857.9, 2222.0e3, 164.8e3, 116.3e3, 8.51, 169.8, 609.8e3, 119.9e3, 106.6e3, 8.43, 8.19, 136.2e3, 188.5e3, 122.9e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ) },
         };
 
-        private double avar(double zzt, double zzl, double zzc, prop_type prop)
+        private static double avar(double zzt, double zzl, double zzc, prop_type prop)
         {
             const double rt = 7.8, rl = 24.0;
             double sgt, yr;
@@ -960,7 +960,7 @@ namespace LongleyRice
             return d1thxv;
         }
 
-        private void qlrpfl(Elevations pfl, RadioClimate klimx, VariabilityMode mdvarx, prop_type prop)
+        private static void qlrpfl(Elevations pfl, RadioClimate klimx, VariabilityMode mdvarx, prop_type prop)
         {
             prop.dist = pfl.EndIndex * pfl.DeltaDistance;
             hzns(pfl, prop);
@@ -1010,7 +1010,7 @@ namespace LongleyRice
         //* Point-To-Point Mode Calculations                     *
         //********************************************************
 
-        public void point_to_pointMDH(double[] elev, double tht_m, double rht_m,
+        public static void point_to_pointMDH(double[] elev, double tht_m, double rht_m,
                   double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
                   double frq_mhz, RadioClimate radio_climate, Polarization pol, VariabilityMode mdvar, double timepct, double locpct, double confpct,
                   out double dbloss, out PropMode propmode, out double deltaH, out int errnum)
@@ -1074,7 +1074,7 @@ namespace LongleyRice
         //* Area Mode Calculations                               *
         //********************************************************
 
-        public void area(VariabilityMode ModVar, double deltaH, double tht_m, double rht_m,
+        public static void area(VariabilityMode ModVar, double deltaH, double tht_m, double rht_m,
                   double dist_km, SiteCriteria TSiteCriteria, SiteCriteria RSiteCriteria,
                   double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
                   double frq_mhz, RadioClimate radio_climate, Polarization pol, double pctTime, double pctLoc,

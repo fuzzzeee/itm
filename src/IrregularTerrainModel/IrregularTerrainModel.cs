@@ -34,8 +34,7 @@ namespace LongleyRice
             else
 #endif
             {
-                var itm = new Refactored();
-                itm.point_to_pointMDH(e, model.Transmitter.Height, model.Receiver.Height, model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency,
+                Refactored.point_to_pointMDH(e, model.Transmitter.Height, model.Receiver.Height, model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency,
                     model.Climate, model.Polarization, model.Variability.Mode, model.Variability.Time, model.Variability.Location, model.Variability.Confidence,
                     out var dbloss, out var propmode, out var deltaH, out var errnum);
                 model.DbLoss = dbloss;
@@ -60,8 +59,7 @@ namespace LongleyRice
             else
 #endif
             {
-                var itm = new Refactored();
-                itm.area(model.Variability.Mode, model.DeltaH, model.Transmitter.Height, model.Receiver.Height, model.Distance, model.Transmitter.SiteCriteria, model.Receiver.SiteCriteria,
+                Refactored.area(model.Variability.Mode, model.DeltaH, model.Transmitter.Height, model.Receiver.Height, model.Distance, model.Transmitter.SiteCriteria, model.Receiver.SiteCriteria,
                     model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency, model.Climate, model.Polarization,
                     model.Variability.Time, model.Variability.Location, model.Variability.Confidence, out var dbloss, out var propmode, out var errnum);
                 model.DbLoss = dbloss;
