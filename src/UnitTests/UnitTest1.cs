@@ -24,19 +24,10 @@ namespace UnitTests
             double frq_mhz, int radio_climate, int pol, double pctTime, double pctLoc,
             double pctConf, out double dbloss, IntPtr strmode, out int errnum);
 
-        public TestContext TestContext { get; set; }
-
         [TestMethod]
-        public void TestMethod1()
+        public void PointToPointTests()
         {
             const double delta = 0.00000001;
-            var results = new List<PointToPointModel>();
-            var times = new Dictionary<int, Stopwatch>
-            {
-                {0, new Stopwatch()},
-                {1, new Stopwatch()},
-                {2, new Stopwatch()},
-            };
 
             var itm = new IrregularTerrainModel();
             foreach (var p in GetPointToPointModels())
@@ -45,18 +36,12 @@ namespace UnitTests
                 e[0] = p.Elevations.Length - 1;
                 e[1] = p.Distance / e[0];
                 p.Elevations.CopyTo(e, 2);
-                times[0].Start();
                 point_to_pointMDH(e, p.Transmitter.Height, p.Receiver.Height, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency, (int)p.Climate, (int)p.Polarization, (int)p.Variability.Mode, p.Variability.Time, p.Variability.Location, p.Variability.Confidence,
                     out var dbloss0, out var propMode0, out var deltaH0, out var errnum0);
-                times[0].Stop();
 
 #if DEBUG
                 itm.UseOriginal = true;
-                times[1].Start();
                 itm.PointToPoint(p);
-                times[1].Stop();
-
-                results.Add(p);
 
                 Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual(propMode0, (int)p.PropMode);
@@ -65,53 +50,42 @@ namespace UnitTests
 
                 itm.UseOriginal = false;
 #endif
-                times[2].Start();
                 itm.PointToPoint(p);
-                times[2].Stop();
 
                 Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual((int)propMode0, (int)p.PropMode);
                 Assert.AreEqual(deltaH0, p.DeltaH, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
             }
+        }
 
+        [TestMethod]
+        public void AreaTests()
+        {
+            const double delta = 0.00000001;
+
+            var itm = new IrregularTerrainModel();
             foreach (var p in GetAreaModels())
             {
-                times[0].Start();
                 area((int)p.Variability.Mode, p.DeltaH, p.Transmitter.Height, p.Receiver.Height, p.Distance, (int)p.Transmitter.SiteCriteria,
                     (int)p.Receiver.SiteCriteria, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency,
                     (int)p.Climate, (int)p.Polarization, p.Variability.Time, p.Variability.Location, p.Variability.Confidence, out var dbloss0,
                     IntPtr.Zero,
                     out var errnum0);
-                times[0].Stop();
 
 #if DEBUG
                 itm.UseOriginal = true;
-                times[1].Start();
                 itm.Area(p);
-                times[1].Stop();
 
                 Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
 
                 itm.UseOriginal = false;
 #endif
-                times[2].Start();
                 itm.Area(p);
-                times[2].Stop();
 
                 Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
-            }
-
-            TestContext.WriteLine($"C++ = {times[0].Elapsed}, C# Original = {times[1].Elapsed}, C# Refactored = {times[2].Elapsed}");
-
-            var path = Path.Combine(TestContext.TestDir, "results.csv");
-            TestContext.WriteLine($"Writing results to {path}");
-            using (var sw = new StreamWriter(Path.Combine(TestContext.TestRunResultsDirectory, path)))
-            {
-                var w = new CsvHelper.CsvWriter(sw);
-                w.WriteRecords(results);
             }
         }
 
