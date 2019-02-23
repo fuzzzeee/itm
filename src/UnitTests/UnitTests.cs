@@ -25,6 +25,43 @@ namespace UnitTests
         const double delta = 0.00000001;
 
         [TestMethod]
+        public void ModelTests()
+        {
+            var model = new AreaModel(2000);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.SurfaceRefractivity = int.MinValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.SurfaceRefractivity = int.MaxValue);
+            Assert.ThrowsException<ArgumentException>(() => model.GroundQuality = (GroundQuality)int.MaxValue);
+            Assert.ThrowsException<ArgumentException>(() => model.Climate = (RadioClimate)int.MaxValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Frequency = int.MinValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Frequency = int.MaxValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.ErrorIndicator = int.MinValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.ErrorIndicator = int.MaxValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Variability.Confidence = int.MinValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Variability.Confidence = int.MaxValue);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Transmitter.Height = int.MinValue);
+        }
+
+        [TestMethod]
+        public void AreaModelTests()
+        {
+            var model = new AreaModel(2000);
+            Assert.ThrowsException<ArgumentException>(() => model.Distance = int.MinValue);
+        }
+
+        [TestMethod]
+        public void PointToPointModelTests()
+        {
+            var model = new PointToPointModel(new double[2], 1);
+            Assert.ThrowsException<ArgumentNullException>(() => model.Elevations = null);
+            Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[0]);
+            Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[1]);
+            Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[1]);
+            model.Elevations = new double[2];
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Distance = int.MinValue);
+            model.Distance = 1;
+        }
+
+        [TestMethod]
         public void PointToPointTests()
         {
             var itm = new IrregularTerrainModel();
