@@ -2,14 +2,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace UnitTests
 {
     [TestClass]
-    public class UnitTest1
+    public class UnitTests
     {
         [DllImport("itm.dll")]
         private static extern void point_to_pointMDH(double[] elev, double tht_m, double rht_m,
@@ -24,11 +22,11 @@ namespace UnitTests
             double frq_mhz, int radio_climate, int pol, double pctTime, double pctLoc,
             double pctConf, out double dbloss, IntPtr strmode, out int errnum);
 
+        const double delta = 0.00000001;
+
         [TestMethod]
         public void PointToPointTests()
         {
-            const double delta = 0.00000001;
-
             var itm = new IrregularTerrainModel();
             foreach (var p in GetPointToPointModels())
             {
@@ -62,8 +60,6 @@ namespace UnitTests
         [TestMethod]
         public void AreaTests()
         {
-            const double delta = 0.00000001;
-
             var itm = new IrregularTerrainModel();
             foreach (var p in GetAreaModels())
             {
@@ -99,7 +95,7 @@ namespace UnitTests
                     {
                         foreach (VariabilityMode mode in Enum.GetValues(typeof(VariabilityMode)))
                         {
-                            foreach (var percent in new[] {0.01, 0.1, 0.5, 0.9, 0.99})
+                            foreach (var percent in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
                             {
                                 foreach (RadioClimate climate in Enum.GetValues(typeof(RadioClimate)))
                                 {

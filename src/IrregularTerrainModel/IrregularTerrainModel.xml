@@ -4,11 +4,6 @@
         <name>IrregularTerrainModel</name>
     </assembly>
     <members>
-        <member name="P:LongleyRice.IrregularTerrainModel.UseOriginal">
-            <summary>
-            Only used for unit testing. Do not set to true unless you're testing or want the algorithm to run slower
-            </summary>
-        </member>
         <member name="P:LongleyRice.Antenna.Height">
             <summary>
             The antenna height in meters
