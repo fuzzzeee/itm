@@ -57,14 +57,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IrregularTerrainModel\IrregularTerrainModel.csproj">
-      <Project>{51c12769-8527-4e06-a987-9dd8742dd3bf}</Project>
-      <Name>IrregularTerrainModel</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IrregularTerrainModel\IrregularTerrainModel.csproj">
+      <Project>{9540d705-534f-476a-a4a1-fc3b7c27c8fd}</Project>
+      <Name>IrregularTerrainModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
