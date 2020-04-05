@@ -327,7 +327,7 @@
         </member>
         <member name="M:LongleyRice.Refactored.ascat(System.Double,LongleyRice.Refactored.prop_type)">
             <summary>
-            Finds the "scatter attenuation" at the distance <paramref name="d"/>. It uses an approximation to the methods of NBS TN101 with checks for inadmissable situations
+            Finds the "scatter attenuation" at the distance <paramref name="d"/>. It uses an approximation to the methods of NBS TN101 with checks for inadmissible situations
             </summary>
             <param name="d"></param>
             <param name="prop"></param>

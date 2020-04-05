@@ -7,7 +7,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "itm", "itm\itm.vcxproj", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IrregularTerrainModel", "IrregularTerrainModel\IrregularTerrainModel.csproj", "{9540D705-534F-476A-A4A1-FC3B7C27C8FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{AE12F464-3C4D-4702-A698-60CBD5258E30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{AE12F464-3C4D-4702-A698-60CBD5258E30}"
+	ProjectSection(ProjectDependencies) = postProject
+		{148C14A6-B963-44BE-AE11-28C19D192CC4} = {148C14A6-B963-44BE-AE11-28C19D192CC4}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

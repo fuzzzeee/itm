@@ -55,7 +55,6 @@ namespace UnitTests
             Assert.ThrowsException<ArgumentNullException>(() => model.Elevations = null);
             Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[0]);
             Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[1]);
-            Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[1]);
             model.Elevations = new double[2];
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Distance = int.MinValue);
             model.Distance = 1;

@@ -8,6 +8,7 @@ namespace LongleyRice
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "IdentifierTypo")]
+    [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
     internal class Refactored
     {
         private class Elevations
@@ -286,7 +287,6 @@ namespace LongleyRice
                 q = et - it;
             var x = Math.Pow(1 / r, 2);
             var h0fv = 4.343 * Math.Log((_h0f_a[it - 1] * x + _h0f_b[it - 1]) * x + 1);
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (q != 0)
                 h0fv = (1 - q) * h0fv + q * 4.343 * Math.Log((_h0f_a[it] * x + _h0f_b[it]) * x + 1);
             return h0fv;
@@ -377,7 +377,7 @@ namespace LongleyRice
         }
 
         /// <summary>
-        /// Finds the "scatter attenuation" at the distance <paramref name="d"/>. It uses an approximation to the methods of NBS TN101 with checks for inadmissable situations
+        /// Finds the "scatter attenuation" at the distance <paramref name="d"/>. It uses an approximation to the methods of NBS TN101 with checks for inadmissible situations
         /// </summary>
         /// <param name="d"></param>
         /// <param name="prop"></param>
@@ -439,7 +439,6 @@ namespace LongleyRice
             const double gma = 157e-9;
             prop.wn = fmhz / 47.7;
             prop.ens = en0;
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (zsys != 0)
                 prop.ens *= Math.Exp(-zsys / 9460.0);
             prop.gme = gma * (1 - 0.04665 * Math.Exp(prop.ens / 179.3));
@@ -616,7 +615,6 @@ namespace LongleyRice
                             {
                                 prop.ak1 = 0;
                                 prop.ak2 = Dim(a2, a0) / q;
-                                // ReSharper disable once CompareOfFloatsByEqualityOperator
                                 if (prop.ak2 == 0)
                                     prop.ak1 = prop.emd;
                             }
@@ -626,7 +624,6 @@ namespace LongleyRice
                     {
                         prop.ak1 = Dim(a2, a1) / (d2 - d1);
                         prop.ak2 = 0;
-                        // ReSharper disable once CompareOfFloatsByEqualityOperator
                         if (prop.ak1 == 0)
                             prop.ak1 = prop.emd;
                     }
@@ -871,8 +868,8 @@ namespace LongleyRice
         {
             double q = 0;
             int j1 = 0, i0 = 0;
-            bool done = false;
-            bool goto10 = true;
+            var done = false;
+            var goto10 = true;
 
             var m = 0;
             var n = nn;
@@ -946,14 +943,14 @@ namespace LongleyRice
                     k++;
                 }
                 s.Points[j] = pfl.Points[k] + (pfl.Points[k] - pfl.Points[k - 1]) * xa;
-                xa = xa + xb;
+                xa += xb;
             }
             z1sq1(s, 0, sn, out xa, out xb);
             xb = (xb - xa) / sn;
             for (var j = 0; j < n; j++)
             {
                 s.Points[j] -= xa;
-                xa = xa + xb;
+                xa += xb;
             }
             var d1thxv = qtile(n - 1, s.Points, ka - 1) - qtile(n - 1, s.Points, kb - 1);
             d1thxv /= 1 - 0.8 * Math.Exp(-(x2 - x1) / 50000.0);
