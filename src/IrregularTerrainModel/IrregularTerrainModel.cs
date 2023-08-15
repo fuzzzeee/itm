@@ -60,7 +60,7 @@ namespace LongleyRice
             else
 #endif
             {
-                var itm = new Refactored();
+                var itm = new RefactoredTesting();
                 itm.area(model.Variability.Mode, model.DeltaH, model.Transmitter.Height, model.Receiver.Height, model.Distance, model.Transmitter.SiteCriteria, model.Receiver.SiteCriteria,
                     model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency, model.Climate, model.Polarization,
                     model.Variability.Time, model.Variability.Location, model.Variability.Confidence, out var dbloss, out var propmode, out var errnum);
@@ -605,6 +605,7 @@ namespace LongleyRice
     [Flags]
     public enum PropMode
     {
+        Undefined = -1,
         LineOfSight = 0,
         SingleHorizon = 4,
         DoubleHorizon = 8,

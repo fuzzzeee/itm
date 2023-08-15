@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Description>The ITS model of radio propagation for frequencies between 20 MHz and 20 GHz (the Longley-Rice model, named for Anita Longley &amp; Phil Rice, 1968) is a general purpose model that can be applied to a large variety of engineering problems. The model, which is based on electromagnetic theory and on statistical analyses of both terrain features and radio measurements, predicts the median attenuation of a radio signal as a function of distance and the variability of the signal in time and in space.</Description>
     <PackageTags>ITM ITS NTIA Longley-Rice</PackageTags>
     <PackageLicenseUrl>https://www.its.bldrdoc.gov/resources/radio-propagation-software/itm/itm.aspx</PackageLicenseUrl>
@@ -12,10 +12,6 @@
     <RepositoryUrl>https://github.com/fuzzzeee/itm</RepositoryUrl>
     <RootNamespace>LongleyRice</RootNamespace>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>

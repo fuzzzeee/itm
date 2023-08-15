@@ -1,4 +1,5 @@
 ﻿#if DEBUG
+using System;
 using System.Numerics;
 using static System.Math;
 
@@ -829,7 +830,7 @@ namespace LongleyRice
             zn = a + b * (xn - xb);
         }
 
-        unsafe double qtile(int nn, double* a, int ir)
+        double qtile(int nn, Span<double> a, int ir)
         {
             double q = 0, r;
             int m, n, i, j, j1 = 0, i0 = 0, k;
@@ -943,13 +944,8 @@ namespace LongleyRice
                 s[j + 2] -= xa;
                 xa = xa + xb;
             }
-
-            unsafe
-            {
-                fixed (double* s2 = &s[2])
-                    d1thxv = qtile(n - 1, s2, ka - 1) - qtile(n - 1, s2, kb - 1);
-            }
-
+            var s2 = s.AsSpan(2);
+            d1thxv = qtile(n - 1, s2, ka - 1) - qtile(n - 1, s2, kb - 1);
             d1thxv /= 1.0 - 0.8 * Exp(-(x2 - x1) / 50.0e3);
             return d1thxv;
         }
