@@ -31,7 +31,7 @@ public class PointToPointModel : Model
             if (value.Length < 2)
                 throw new ArgumentException("At least 2 elevations must be provided", nameof(value));
             _elevations = value;
-            OnPropertyChanged(nameof(Elevations));
+            OnPropertyChanged();
         }
     }
 
@@ -45,10 +45,10 @@ public class PointToPointModel : Model
         {
             if (Distance != value)
             {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Distance must be positive");
+                if (value < 1000 || value > 200000)
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Distance must be between 1km and 20km");
                 _distance = value;
-                OnPropertyChanged(nameof(Distance));
+                OnPropertyChanged();
             }
         }
     }

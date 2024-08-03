@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace LongleyRice;
 
@@ -15,12 +16,18 @@ public class Variability : INotifyPropertyChanged
     private const double _minValue = 0.01, _maxValue = 0.99, _defaultValue = 0.5;
     public VariabilityMode Mode { get; set; } = VariabilityMode.Broadcast;
 
+    /// <summary>
+    /// Represents the fraction of time during which the losses are less than the calculated loss
+    /// </summary>
     public double Time
     {
         get => GetLevel(PercentLevel.Time);
         set => SetLevel(PercentLevel.Time, value);
     }
 
+    /// <summary>
+    /// Represents the fraction of locations at which the losses are less than the calculated loss
+    /// </summary>
     public double Location
     {
         get => GetLevel(PercentLevel.Location);
@@ -71,7 +78,7 @@ public class Variability : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual void OnPropertyChanged(string propertyName)
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

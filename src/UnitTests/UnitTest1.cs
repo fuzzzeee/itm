@@ -53,7 +53,7 @@ namespace UnitTests
         {
             var model = new PointToPointModel(new double[2], 1);
             Assert.ThrowsException<ArgumentNullException>(() => model.Elevations = null);
-            Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[0]);
+            Assert.ThrowsException<ArgumentException>(() => model.Elevations = Array.Empty<double>());
             Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[1]);
             model.Elevations = new double[2];
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Distance = int.MinValue);
@@ -63,7 +63,6 @@ namespace UnitTests
         [TestMethod]
         public void PointToPointTests()
         {
-            var itm = new IrregularTerrainModel();
             foreach (var p in GetPointToPointModels())
             {
                 var e = new double[p.Elevations.Length + 2];
@@ -73,6 +72,7 @@ namespace UnitTests
                 point_to_pointMDH(e, p.Transmitter.Height, p.Receiver.Height, p.GroundDielectric, p.GroundConductivity, p.SurfaceRefractivity, p.Frequency, (int)p.Climate, (int)p.Polarization, (int)p.Variability.Mode, p.Variability.Time, p.Variability.Location, p.Variability.Confidence,
                     out var dbloss0, out var propMode0, out var deltaH0, out var errnum0);
 
+                var itm = new IrregularTerrainModel();
 #if DEBUG
                 itm.UseOriginal = true;
                 itm.PointToPoint(p);
@@ -82,6 +82,7 @@ namespace UnitTests
                 Assert.AreEqual(deltaH0, p.DeltaH, delta);
                 Assert.AreEqual(errnum0, p.ErrorIndicator);
 
+                itm = new IrregularTerrainModel();
                 itm.UseOriginal = false;
 #endif
                 itm.PointToPoint(p);

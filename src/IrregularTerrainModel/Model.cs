@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace LongleyRice;
 
@@ -58,7 +59,7 @@ public class Model : INotifyPropertyChanged
                 if (!Enum.IsDefined(typeof(GroundQuality), value))
                     throw new ArgumentException($"Undefined ground quality '{value}'", nameof(value));
                 _groundQuality = value;
-                OnPropertyChanged(nameof(GroundQuality));
+                OnPropertyChanged();
             }
         }
     }
@@ -73,7 +74,7 @@ public class Model : INotifyPropertyChanged
                 if (!Enum.IsDefined(typeof(RadioClimate), value))
                     throw new ArgumentException($"Undefined climate '{value}'", nameof(value));
                 _climate = value;
-                OnPropertyChanged(nameof(Climate));
+                OnPropertyChanged();
             }
         }
     }
@@ -86,7 +87,7 @@ public class Model : INotifyPropertyChanged
             if (Polarization != value)
             {
                 _polarization = value;
-                OnPropertyChanged(nameof(Polarization));
+                OnPropertyChanged();
             }
         }
     }
@@ -104,7 +105,7 @@ public class Model : INotifyPropertyChanged
                 if (value < 20 || value > 20000)
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Frequency must be between 20MHz and 20GHz");
                 _frequency = value;
-                OnPropertyChanged(nameof(Frequency));
+                OnPropertyChanged();
             }
         }
     }
@@ -120,13 +121,13 @@ public class Model : INotifyPropertyChanged
             if (GroundDielectric != value)
             {
                 _groundDialectric = value;
-                OnPropertyChanged(nameof(GroundDielectric));
+                OnPropertyChanged();
             }
         }
     }
 
     /// <summary>
-    /// Conductivity of Ground
+    /// Electrical ground conductivity
     /// </summary>
     public double GroundConductivity
     {
@@ -136,11 +137,14 @@ public class Model : INotifyPropertyChanged
             if (GroundConductivity != value)
             {
                 _groundConductivity = value;
-                OnPropertyChanged(nameof(GroundConductivity));
+                OnPropertyChanged();
             }
         }
     }
 
+    /// <summary>
+    /// Minimum monthly mean surface refractivity in N-units
+    /// </summary>
     public double SurfaceRefractivity
     {
         get => _surfaceRefractivity ?? _surfaceRefractivities[Climate];
@@ -151,7 +155,7 @@ public class Model : INotifyPropertyChanged
                 if (value < 250 || value > 400)
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Surface Refractivity must be between 250 and 400");
                 _surfaceRefractivity = value;
-                OnPropertyChanged(nameof(SurfaceRefractivity));
+                OnPropertyChanged();
             }
         }
     }
@@ -164,11 +168,14 @@ public class Model : INotifyPropertyChanged
             if (DbLoss != value)
             {
                 _dbLoss = value;
-                OnPropertyChanged(nameof(DbLoss));
+                OnPropertyChanged();
             }
         }
     }
 
+    /// <summary>
+    /// Terrain irregularity
+    /// </summary>
     public virtual double DeltaH
     {
         get => _deltaH ?? 0;
@@ -177,7 +184,7 @@ public class Model : INotifyPropertyChanged
             if (DeltaH != value)
             {
                 _deltaH = value;
-                OnPropertyChanged(nameof(DeltaH));
+                OnPropertyChanged();
             }
         }
     }
@@ -201,7 +208,7 @@ public class Model : INotifyPropertyChanged
                 if (value < 0 || value > 4)
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Error indicator must be between 0 and 4");
                 _errorIndicator = value;
-                OnPropertyChanged(nameof(ErrorIndicator));
+                OnPropertyChanged();
             }
         }
     }
@@ -215,7 +222,7 @@ public class Model : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual void OnPropertyChanged(string propertyName)
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

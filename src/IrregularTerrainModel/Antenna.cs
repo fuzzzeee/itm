@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace LongleyRice;
 
@@ -18,10 +19,10 @@ public class Antenna : INotifyPropertyChanged
         {
             if (Height != value)
             {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Height cannot be negative");
+                if (value < 0.5 || value > 3000)
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Height must be between 50cm and 3km");
                 _height = value;
-                OnPropertyChanged(nameof(Height));
+                OnPropertyChanged();
             }
         }
     }
@@ -34,14 +35,14 @@ public class Antenna : INotifyPropertyChanged
             if (SiteCriteria != value)
             {
                 _siteCriteria = value;
-                OnPropertyChanged(nameof(SiteCriteria));
+                OnPropertyChanged();
             }
         }
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual void OnPropertyChanged(string propertyName)
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

@@ -39,7 +39,7 @@ public class AreaModel : Model
                 if (value <= 0)
                     throw new ArgumentException("Distance must be positive");
                 _distance = value;
-                OnPropertyChanged(nameof(Distance));
+                OnPropertyChanged();
             }
         }
     }
@@ -59,7 +59,7 @@ public class AreaModel : Model
             if (TerrainType != value)
             {
                 _terrainType = value;
-                OnPropertyChanged(nameof(TerrainType));
+                OnPropertyChanged();
             }
         }
     }
