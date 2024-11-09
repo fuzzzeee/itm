@@ -4,6 +4,9 @@ using System.Runtime.CompilerServices;
 
 namespace LongleyRice;
 
+/// <summary>
+/// A transmitting or receiving antenna
+/// </summary>
 public class Antenna : INotifyPropertyChanged
 {
     private double _height;
@@ -27,6 +30,9 @@ public class Antenna : INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Criteria describing the care taken at each terminal to assure good propagation conditions
+    /// </summary>
     public SiteCriteria SiteCriteria
     {
         get => _siteCriteria;
@@ -40,8 +46,12 @@ public class Antenna : INotifyPropertyChanged
         }
     }
 
+    /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
 
+    /// <summary>
+    /// A property value has changed
+    /// </summary>
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

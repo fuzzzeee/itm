@@ -2,6 +2,9 @@ namespace LongleyRice;
 
 public enum TerrainType
 {
+    /// <summary>
+    /// Flat or Water
+    /// </summary>
     Flat = 0,
     Plains = 30,
     /// <summary>

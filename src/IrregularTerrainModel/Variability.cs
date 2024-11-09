@@ -7,11 +7,11 @@ namespace LongleyRice;
 
 public class Variability : INotifyPropertyChanged
 {
-    private readonly Dictionary<PercentLevel, double?> _levels = new Dictionary<PercentLevel, double?>
+    private readonly Dictionary<PercentLevel, double> _levels = new Dictionary<PercentLevel, double>
     {
-        {PercentLevel.Time, null},
-        {PercentLevel.Location, null},
-        {PercentLevel.Confidence, null},
+        {PercentLevel.Time, _defaultValue},
+        {PercentLevel.Location, _defaultValue},
+        {PercentLevel.Confidence, _defaultValue},
     };
     private const double _minValue = 0.01, _maxValue = 0.99, _defaultValue = 0.5;
     public VariabilityMode Mode { get; set; } = VariabilityMode.Broadcast;
@@ -53,8 +53,7 @@ public class Variability : INotifyPropertyChanged
                     level = PercentLevel.Time;
                 break;
         }
-        lock (_levels)
-            return _levels[level] ?? _defaultValue;
+        return _levels[level];
     }
 
     private void SetLevel(PercentLevel level, double value)
@@ -63,8 +62,7 @@ public class Variability : INotifyPropertyChanged
         {
             if (value < _minValue || value > _maxValue)
                 throw new ArgumentOutOfRangeException(nameof(value), value, $"{level} must be between {_minValue} and {_maxValue}");
-            lock (_levels)
-                _levels[level] = value;
+            _levels[level] = value;
             OnPropertyChanged(level.ToString());
         }
     }
@@ -76,8 +74,12 @@ public class Variability : INotifyPropertyChanged
         Confidence,
     }
 
+    /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
 
+    /// <summary>
+    /// A property value has changed
+    /// </summary>
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

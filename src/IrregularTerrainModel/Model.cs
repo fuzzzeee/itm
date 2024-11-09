@@ -220,8 +220,12 @@ public class Model : INotifyPropertyChanged
 
     public Variability Variability { get; } = new Variability();
 
+    /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
 
+    /// <summary>
+    /// A property value has changed
+    /// </summary>
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
