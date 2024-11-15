@@ -14,10 +14,6 @@ public enum ErrorCode
     /// </remarks>
     NearlyOutOfRange = 1,
     /// <summary>
-    /// Default parameters have been substituted for impossible ones
-    /// </summary>
-    DefaultsUsed = 2,
-    /// <summary>
     /// Warning: A combination of parameters is out of range
     /// </summary>
     /// <remarks>

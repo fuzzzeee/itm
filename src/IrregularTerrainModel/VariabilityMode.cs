@@ -2,6 +2,7 @@ namespace LongleyRice;
 
 public enum VariabilityMode
 {
+    Default = Broadcast,
     /// <summary>
     /// Confidence is Time/Situation/Location, Time, Location not used
     /// </summary>

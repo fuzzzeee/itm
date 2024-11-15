@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿#if DEBUG
+using System.Numerics;
 
 namespace LongleyRice;
 
@@ -14,3 +15,4 @@ static class ComplexExtensions
         return complex.Imaginary;
     }
 }
+#endif

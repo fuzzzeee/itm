@@ -60,6 +60,28 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void DefaultPointToPointTest()
+        {
+            var itm = new IrregularTerrainModel();
+            foreach (var model in GetElevations())
+            {
+                model.Climate = RadioClimate.Default;
+                model.Frequency = 20;
+                model.GroundQuality = GroundQuality.Average;
+                model.Polarization = Polarization.Default;
+                model.Receiver.Height = 10;
+                model.Receiver.SiteCriteria = SiteCriteria.Default;
+                model.Transmitter.Height = 10;
+                model.Transmitter.SiteCriteria = SiteCriteria.Default;
+                model.Variability.Confidence = 0.5;
+                model.Variability.Location = 0.5;
+                model.Variability.Mode = VariabilityMode.Default;
+                model.Variability.Time = 0.5;
+                itm.PointToPoint(model);
+            }
+        }
+
+        [TestMethod]
         public void PointToPointTests()
         {
             var native = new Stopwatch();

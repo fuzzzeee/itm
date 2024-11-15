@@ -2,6 +2,7 @@ namespace LongleyRice;
 
 public enum RadioClimate
 {
+    Default = ContinentalTemperate,
     /// <summary>
     /// Congo
     /// </summary>
