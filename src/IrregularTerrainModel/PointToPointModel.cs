@@ -45,7 +45,7 @@ public class PointToPointModel : Model
         {
             if (Distance != value)
             {
-                if (value < 1000 || value > 200000)
+                if (value < 1000 || value > 20000)
                     throw new ArgumentOutOfRangeException(nameof(value), value, "Distance must be between 1km and 20km");
                 _distance = value;
                 OnPropertyChanged();
