@@ -28,7 +28,7 @@ public class IrregularTerrainModel
             model.DbLoss = dbloss;
             model.PropMode = (PropMode)propmode;
             model.DeltaH = deltaH;
-            model.ErrorIndicator = errnum;
+            model.ErrorCode = (ErrorCode)errnum;
         }
         else
 #endif
@@ -40,7 +40,7 @@ public class IrregularTerrainModel
             model.DbLoss = dbloss;
             model.PropMode = propmode;
             model.DeltaH = deltaH;
-            model.ErrorIndicator = errnum;
+            model.ErrorCode = errnum;
         }
     }
 
@@ -54,7 +54,7 @@ public class IrregularTerrainModel
                 model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency, (int)model.Climate, (int)model.Polarization,
                 model.Variability.Time, model.Variability.Location, model.Variability.Confidence, out var dbloss, out _, out var errnum);
             model.DbLoss = dbloss;
-            model.ErrorIndicator = errnum;
+            model.ErrorCode = (ErrorCode)errnum;
         }
         else
 #endif
@@ -64,7 +64,7 @@ public class IrregularTerrainModel
                 model.GroundDielectric, model.GroundConductivity, model.SurfaceRefractivity, model.Frequency, model.Climate, model.Polarization,
                 model.Variability.Time, model.Variability.Location, model.Variability.Confidence, out var dbloss, out _, out var errnum);
             model.DbLoss = dbloss;
-            model.ErrorIndicator = errnum;
+            model.ErrorCode = errnum;
         }
     }
 }

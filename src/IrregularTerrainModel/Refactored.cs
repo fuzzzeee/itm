@@ -114,7 +114,7 @@ internal class Refactored
     /// <summary>
     /// Error indicator
     /// </summary>
-    private int _errorCode;
+    private ErrorCode _errorCode;
     /// <summary>
     /// Controlling mode
     /// </summary>
@@ -182,7 +182,7 @@ internal class Refactored
 
     private double _ad, _rr, _etq, _h0s;
 
-    private double _dexa, _de, _vmd, _vs0, _sgl, _sgtm, _sgtp, _sgtd, _tgtd, _gm, _gp;
+    private double _dexa, _de, _vmd, _vs0, _sglocation, _sgtime_m, _sgtime_p, _sgtime_d, _tgtd, _gm, _gp;
 
     private double _dmin, _xae;
 
@@ -303,8 +303,8 @@ internal class Refactored
             q += 10;
         _wd1 = Math.Sqrt(1 + _qk / q);
         _xd1 = _totalHorizonDistance + _totalBendingAngle / _earthsEffectiveCurvature;
-        q = (1 - 0.8 * Math.Exp(-_lineOfSightDistance / 50000.0)) * _terrainIrregularity;
-        q *= 0.78 * Math.Exp(-Math.Pow(q / 16.0, 0.25));
+        q = (1 - 0.8 * Math.Exp(-_lineOfSightDistance / 50000)) * _terrainIrregularity;
+        q *= 0.78 * Math.Exp(-Math.Pow(q / 16, 0.25));
         _afo = Math.Min(15, 2.171 * Math.Log(1 + 4.77e-4 * Transmitter.StructuralHeight * Receiver.StructuralHeight * _waveNumber * q));
         _qk = 1 / Complex.Abs(_groundImpedance);
         _aht = 20;
@@ -337,22 +337,9 @@ internal class Refactored
         var pk = _qk / wa;
         q = (1.607 - pk) * 151 * wa * th + _xht;
         var ar = 0.05751 * q - 4.343 * Math.Log(q) - _aht;
-        q = (_wd1 + _xd1 / distance) * Math.Min((1 - 0.8 * Math.Exp(-distance / 50000.0)) * _terrainIrregularity * _waveNumber, 6283.2);
+        q = (_wd1 + _xd1 / distance) * Math.Min((1 - 0.8 * Math.Exp(-distance / 50000)) * _terrainIrregularity * _waveNumber, 6283.2);
         var wd = 25.1 / (25.1 + Math.Sqrt(q));
         return ar * wd + (1 - wd) * adiffv + _afo;
-    }
-
-    private void SetupScatterAttenuation()
-    {
-        _ad = Transmitter.HorizonDistance - Receiver.HorizonDistance;
-        _rr = Receiver.EffectiveHeight / Transmitter.EffectiveHeight;
-        if (_ad < 0)
-        {
-            _ad = -_ad;
-            _rr = 1 / _rr;
-        }
-        _etq = (5.67e-6 * _surfaceRefractivity - 2.32e-3) * _surfaceRefractivity + 0.031;
-        _h0s = -15;
     }
 
     /// <summary>
@@ -379,7 +366,7 @@ internal class Refactored
             ss = Math.Max(0.1, ss);
             q = Math.Min(Math.Max(0.1, q), 10);
             var z0 = (distance - _ad) * (distance + _ad) * th * 0.25 / distance;
-            var et = (_etq * Math.Exp(-Math.Pow(Math.Min(1.7, z0 / 8000.0), 6)) + 1) * z0 / 1.7556e3;
+            var et = (_etq * Math.Exp(-Math.Pow(Math.Min(1.7, z0 / 8000), 6)) + 1) * z0 / 1.7556e3;
             var ett = Math.Max(et, 1);
             h0 = (ScatterFieldsH01(r1, ett) + ScatterFieldsH01(r2, ett)) * 0.5;
             h0 += Math.Min(h0, (1.38 - Math.Log(ett)) * Math.Log(ss) * Math.Log(q) * 0.49);
@@ -391,7 +378,7 @@ internal class Refactored
         }
         _h0s = h0;
         th = _totalBendingAngle + distance * _earthsEffectiveCurvature;
-        return ScatterFieldsF0d(th * distance) + 4.343 * Math.Log(47.7 * _waveNumber * Math.Pow(th, 4)) - 0.1 * (_surfaceRefractivity - 301) * Math.Exp(-th * distance / 40000.0) + h0;
+        return ScatterFieldsF0d(th * distance) + 4.343 * Math.Log(47.7 * _waveNumber * Math.Pow(th, 4)) - 0.1 * (_surfaceRefractivity - 301) * Math.Exp(-th * distance / 40000) + h0;
     }
 
     private static double qerfi(double percent)
@@ -410,7 +397,7 @@ internal class Refactored
         _waveNumber = fmhz / 47.7;
         _surfaceRefractivity = surfaceRefractivity;
         if (zsys != 0)
-            _surfaceRefractivity *= Math.Exp(-zsys / 9460.0);
+            _surfaceRefractivity *= Math.Exp(-zsys / 9460);
         _earthsEffectiveCurvature = 157e-9 * (1 - 0.04665 * Math.Exp(_surfaceRefractivity / 179.3));
         var zq = new Complex(epsDielect, 376.62 * sgmConductivity / _waveNumber);
         var groundImpedance = Complex.Sqrt(zq - 1);
@@ -424,18 +411,13 @@ internal class Refactored
         return r.Real * r.Real + r.Imaginary * r.Imaginary;
     }
 
-    private void SetupLineOfSightAttenuation()
-    {
-        _wls = 0.021 / (0.021 + _waveNumber * _terrainIrregularity / Math.Max(10000, _lineOfSightDistance));
-    }
-
     /// <summary>
     /// Finds the "line-of-sight" attenuation at the <paramref name="distance"/> It uses a convex combination of plane earth fields and diffracted fields
     /// </summary>
     private double LineOfSightAttenuation(double distance)
     {
-        var q = (1 - 0.8 * Math.Exp(-distance / 50000.0)) * _terrainIrregularity;
-        var s = 0.78 * q * Math.Exp(-Math.Pow(q / 16.0, 0.25));
+        var q = (1 - 0.8 * Math.Exp(-distance / 50000)) * _terrainIrregularity;
+        var s = 0.78 * q * Math.Exp(-Math.Pow(q / 16, 0.25));
         q = Transmitter.EffectiveHeight + Receiver.EffectiveHeight;
         var sps = q / Math.Sqrt(distance * distance + q * q);
         var r = (sps - _groundImpedance) / (sps + _groundImpedance) * Math.Exp(-Math.Min(10, _waveNumber * s * sps));
@@ -460,7 +442,7 @@ internal class Refactored
             {
                 q = antenna.SiteCriteria != SiteCriteria.Careful ? 9 : 4;
                 if (antenna.StructuralHeight < 5)
-                    q *= Math.Sin(0.3141593 * antenna.StructuralHeight);
+                    q *= Math.Sin(0.3141593 * antenna.StructuralHeight); // 0.3141593 should probably be (Math.PI / 10)
                 antenna.EffectiveHeight = antenna.StructuralHeight + (1 + q) * Math.Exp(-Math.Min(20, 2 * antenna.StructuralHeight / Math.Max(1e-3, _terrainIrregularity)));
             }
             q = Math.Sqrt(2 * antenna.EffectiveHeight / _earthsEffectiveCurvature);
@@ -490,13 +472,13 @@ internal class Refactored
             _totalBendingAngle = Math.Max(Transmitter.HorizonElevationAngle + Receiver.HorizonElevationAngle, -_totalHorizonDistance * _earthsEffectiveCurvature);
             _wlos = false;
             _wscat = false;
-            if (_waveNumber < 0.838 || _waveNumber > 210) 
-                _errorCode = Math.Max(_errorCode, 1);
+            if (_waveNumber < 0.838 || _waveNumber > 210)
+                SetErrorCode(ErrorCode.NearlyOutOfRange);
             foreach (var antenna in Antennae)
             {
                 if (antenna.StructuralHeight < 1 || antenna.StructuralHeight > 1000)
                 {
-                    _errorCode = Math.Max(_errorCode, 1);
+                    SetErrorCode(ErrorCode.NearlyOutOfRange);
                 }
             }
             foreach (var antenna in Antennae)
@@ -504,7 +486,7 @@ internal class Refactored
                 if (Math.Abs(antenna.HorizonElevationAngle) > 200e-3 || antenna.HorizonDistance < 0.1 * antenna.SmoothEarthHorizonDistance ||
                     antenna.HorizonDistance > 3 * antenna.SmoothEarthHorizonDistance)
                 {
-                    _errorCode = Math.Max(_errorCode, 3);
+                    SetErrorCode(ErrorCode.CombinationOutOfRange);
                 }
             }
             if (_surfaceRefractivity < 250 || _surfaceRefractivity > 400 ||
@@ -512,13 +494,13 @@ internal class Refactored
                 _groundImpedance.Real <= Math.Abs(_groundImpedance.Imaginary) ||
                 _waveNumber < 0.419 || _waveNumber > 420)
             {
-                _errorCode = 4;
+                SetErrorCode(ErrorCode.SomeOutOfRange);
             }
             foreach (var antenna in Antennae)
             {
                 if (antenna.StructuralHeight < 0.5 || antenna.StructuralHeight > 3000)
                 {
-                    _errorCode = 4;
+                    SetErrorCode(ErrorCode.SomeOutOfRange);
                 }
             }
             _dmin = Math.Abs(Transmitter.EffectiveHeight - Receiver.EffectiveHeight) / 200e-3;
@@ -538,18 +520,18 @@ internal class Refactored
         }
         if (_distance > 0)
         {
-            if (_distance > 1000000) 
-                _errorCode = Math.Max(_errorCode, 1);
-            if (_distance < _dmin) 
-                _errorCode = Math.Max(_errorCode, 3);
-            if (_distance < 1000 || _distance > 2000000) 
-                _errorCode = 4;
+            if (_distance > 1000000)
+                SetErrorCode(ErrorCode.NearlyOutOfRange);
+            if (_distance < _dmin)
+                SetErrorCode(ErrorCode.CombinationOutOfRange);
+            if (_distance < 1000 || _distance > 2000000)
+                SetErrorCode(ErrorCode.SomeOutOfRange);
         }
         if (_distance < _lineOfSightDistance)
         {
             if (!_wlos)
             {
-                SetupLineOfSightAttenuation();
+                _wls = 0.021 / (0.021 + _waveNumber * _terrainIrregularity / Math.Max(10000, _lineOfSightDistance));
                 var lineOfSightDistance = _lineOfSightDistance;
                 var a2 = _diffractionCoefficientAED + lineOfSightDistance * _diffractionCoefficientEMD;
                 var d0 = 1.908 * _waveNumber * Transmitter.EffectiveHeight * Receiver.EffectiveHeight;
@@ -598,14 +580,23 @@ internal class Refactored
         {
             if (!_wscat)
             {
-                SetupScatterAttenuation();
+                _ad = Transmitter.HorizonDistance - Receiver.HorizonDistance;
+                _rr = Receiver.EffectiveHeight / Transmitter.EffectiveHeight;
+                if (_ad < 0)
+                {
+                    _ad = -_ad;
+                    _rr = 1 / _rr;
+                }
+                _etq = (5.67e-6 * _surfaceRefractivity - 2.32e-3) * _surfaceRefractivity + 0.031;
+                _h0s = -15;
+
                 var d5 = _totalHorizonDistance + 200000;
                 var d6 = d5 + 200000;
                 var a6 = ScatterAttenuation(d6);
                 var a5 = ScatterAttenuation(d5);
                 if (a5 < 1000)
                 {
-                    _scatterCoefficientEM = (a6 - a5) / 200000.0;
+                    _scatterCoefficientEM = (a6 - a5) / 200000;
                     _scatterDistance = Math.Max(_lineOfSightDistance, Math.Max(_totalHorizonDistance + 0.3 * _xae * Math.Log(47.7 * _waveNumber), (a5 - _diffractionCoefficientAED - _scatterCoefficientEM * d5) / (_diffractionCoefficientEMD - _scatterCoefficientEM)));
                     _scatterCoefficientAE = (_diffractionCoefficientEMD - _scatterCoefficientEM) * _scatterDistance + _diffractionCoefficientAED;
                 }
@@ -646,20 +637,19 @@ internal class Refactored
 
     private static readonly ClimateSettings[] _climateSettings =
     [
-        new ClimateSettings (-9.67, 12.7, 144.9e3, 190.3e3, 133.8e3, 2.13, 159.5, 762.2e3, 123.6e3, 94.5e3, 2.11, 102.3, 636.9e3, 134.8e3, 95.6e3, 1.224, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ),
-        new ClimateSettings (-0.62, 9.19, 228.9e3, 205.2e3, 143.6e3, 2.66, 7.67, 100.4e3, 172.5e3, 136.4e3, 6.87, 15.53, 138.7e3, 143.7e3, 98.6e3, 0.801, 2.161, 1.0, 0.0, 0.0, 0.93, 0.31, 2.00 ),
-        new ClimateSettings (1.26, 15.5, 262.6e3, 185.2e3, 99.8e3, 6.11, 6.65, 138.2e3, 242.2e3, 178.6e3, 10.08, 9.60, 165.3e3, 225.7e3, 129.7e3, 1.380, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ),
-        new ClimateSettings (-9.21, 9.05, 84.1e3, 101.1e3, 98.6e3, 1.98, 13.11, 139.1e3, 132.7e3, 193.5e3, 3.68, 159.3, 464.4e3, 93.1e3, 94.2e3, 1.000, 20.0, 1.0, 0.0, 0.0, 0.93, 0.19, 1.79 ),
-        new ClimateSettings (-0.62, 9.19, 228.9e3, 205.2e3, 143.6e3, 2.68, 7.16, 93.7e3, 186.8e3, 133.5e3, 4.75, 8.12, 93.2e3, 135.9e3, 113.4e3, 1.224, 1.282, 0.92, 0.25, 1.77, 0.93, 0.31, 2.00 ),
-        new ClimateSettings (-0.39, 2.86, 141.7e3, 315.9e3, 167.4e3, 6.86, 10.38, 187.8e3, 169.6e3, 108.9e3, 8.58, 13.97, 216.0e3, 152.0e3, 122.7e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 ),
-        new ClimateSettings (3.15, 857.9, 2222.0e3, 164.8e3, 116.3e3, 8.51, 169.8, 609.8e3, 119.9e3, 106.6e3, 8.43, 8.19, 136.2e3, 188.5e3, 122.9e3, 1.518, 1.282, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 )
+        new ClimateSettings (-9.67, 12.7, 144.9e3, 190.3e3, 133.8e3, 2.13, 159.5, 762.2e3, 123.6e3, 94.5e3, 2.11, 102.3, 636.9e3, 134.8e3, 95.6e3, 1.224, 1.282, 1, 0, 0, 1, 0, 0 ),
+        new ClimateSettings (-0.62, 9.19, 228.9e3, 205.2e3, 143.6e3, 2.66, 7.67, 100.4e3, 172.5e3, 136.4e3, 6.87, 15.53, 138.7e3, 143.7e3, 98.6e3, 0.801, 2.161, 1, 0, 0, 0.93, 0.31, 2 ),
+        new ClimateSettings (1.26, 15.5, 262.6e3, 185.2e3, 99.8e3, 6.11, 6.65, 138.2e3, 242.2e3, 178.6e3, 10.08, 9.60, 165.3e3, 225.7e3, 129.7e3, 1.380, 1.282, 1, 0, 0, 1, 0, 0 ),
+        new ClimateSettings (-9.21, 9.05, 84.1e3, 101.1e3, 98.6e3, 1.98, 13.11, 139.1e3, 132.7e3, 193.5e3, 3.68, 159.3, 464.4e3, 93.1e3, 94.2e3, 1, 20, 1, 0, 0, 0.93, 0.19, 1.79 ),
+        new ClimateSettings (-0.62, 9.19, 228.9e3, 205.2e3, 143.6e3, 2.68, 7.16, 93.7e3, 186.8e3, 133.5e3, 4.75, 8.12, 93.2e3, 135.9e3, 113.4e3, 1.224, 1.282, 0.92, 0.25, 1.77, 0.93, 0.31, 2 ),
+        new ClimateSettings (-0.39, 2.86, 141.7e3, 315.9e3, 167.4e3, 6.86, 10.38, 187.8e3, 169.6e3, 108.9e3, 8.58, 13.97, 216.0e3, 152.0e3, 122.7e3, 1.518, 1.282, 1, 0, 0, 1, 0, 0 ),
+        new ClimateSettings (3.15, 857.9, 2222.0e3, 164.8e3, 116.3e3, 8.51, 169.8, 609.8e3, 119.9e3, 106.6e3, 8.43, 8.19, 136.2e3, 188.5e3, 122.9e3, 1.518, 1.282, 1, 0, 0, 1, 0, 0 )
     ];
 
     private double avar(double timePercent, double locationPercent, double confidencePercent)
     {
         if (_changes > Changes.None)
         {
-            double q;
             switch (_changes)
             {
                 case Changes.All:
@@ -667,7 +657,7 @@ internal class Refactored
                     goto case Changes.VariabilityMode;
                 case Changes.VariabilityMode:
                 case Changes.Frequency:
-                    q = Math.Log(0.133 * _waveNumber);
+                    var q = Math.Log(0.133 * _waveNumber);
                     _gm = _cs.cfm1 + _cs.cfm2 / (Math.Pow(_cs.cfm3 * q, 2) + 1);
                     _gp = _cs.cfp1 + _cs.cfp2 / (Math.Pow(_cs.cfp3 * q, 2) + 1);
                     goto case Changes.AntennaHeight;
@@ -682,71 +672,71 @@ internal class Refactored
                     break;
             }
             _vmd = curve(_cs.cv1, _cs.cv2, _cs.yv1, _cs.yv2, _cs.yv3, _de);
-            _sgtm = curve(_cs.csm1, _cs.csm2, _cs.ysm1, _cs.ysm2, _cs.ysm3, _de) * _gm;
-            _sgtp = curve(_cs.csp1, _cs.csp2, _cs.ysp1, _cs.ysp2, _cs.ysp3, _de) * _gp;
-            _sgtd = _sgtp * _cs.csd1;
-            _tgtd = (_sgtp - _sgtd) * _cs.zd;
+            _sgtime_m = curve(_cs.csm1, _cs.csm2, _cs.ysm1, _cs.ysm2, _cs.ysm3, _de) * _gm;
+            _sgtime_p = curve(_cs.csp1, _cs.csp2, _cs.ysp1, _cs.ysp2, _cs.ysp3, _de) * _gp;
+            _sgtime_d = _sgtime_p * _cs.csd1;
+            _tgtd = (_sgtime_p - _sgtime_d) * _cs.zd;
             if (_w1)
             {
-                _sgl = 0;
+                _sglocation = 0;
             }
             else
             {
-                q = (1 - 0.8 * Math.Exp(-_distance / 50000.0)) * _terrainIrregularity * _waveNumber;
-                _sgl = 10 * q / (q + 13);
+                var q = (1 - 0.8 * Math.Exp(-_distance / 50000)) * _terrainIrregularity * _waveNumber;
+                _sglocation = 10 * q / (q + 13);
             }
-            _vs0 = Math.Pow(5 + 3 * Math.Exp(-_de / 100000.0), 2);
+            _vs0 = Math.Pow(5 + 3 * Math.Exp(-_de / 100000), 2);
             _changes = Changes.None;
         }
-        var zt = timePercent;
-        var zl = locationPercent;
-        var zc = confidencePercent;
+        var ztime = timePercent;
+        var zlocation = locationPercent;
+        var zconfidence = confidencePercent;
         switch (_variabilityMode)
         {
             case VariabilityMode.Single:
-                zt = zc;
-                zl = zc;
+                ztime = zconfidence;
+                zlocation = zconfidence;
                 break;
             case VariabilityMode.Individual:
-                zl = zc;
+                zlocation = zconfidence;
                 break;
             case VariabilityMode.Mobile:
-                zl = zt;
+                zlocation = ztime;
                 break;
         }
-        if (Math.Abs(zt) > 3.1 || Math.Abs(zl) > 3.1 || Math.Abs(zc) > 3.1)
+        if (Math.Abs(ztime) > 3.1 || Math.Abs(zlocation) > 3.1 || Math.Abs(zconfidence) > 3.1)
         {
-            _errorCode = Math.Max(_errorCode, 1);
+            SetErrorCode(ErrorCode.NearlyOutOfRange);
         }
-        double sgt;
-        if (zt < 0)
-            sgt = _sgtm;
-        else if (zt <= _cs.zd)
-            sgt = _sgtp;
+        double sgtime;
+        if (ztime < 0)
+            sgtime = _sgtime_m;
+        else if (ztime <= _cs.zd)
+            sgtime = _sgtime_p;
         else
-            sgt = _sgtd + _tgtd / zt;
-        var vs = _vs0 + Math.Pow(sgt * zt, 2) / (7.8 + zc * zc) + Math.Pow(_sgl * zl, 2) / (24.0 + zc * zc);
+            sgtime = _sgtime_d + _tgtd / ztime;
+        var vs = _vs0 + Math.Pow(sgtime * ztime, 2) / (7.8 + zconfidence * zconfidence) + Math.Pow(_sglocation * zlocation, 2) / (24 + zconfidence * zconfidence);
         double yr;
         switch (_variabilityMode)
         {
             case VariabilityMode.Single:
                 yr = 0;
-                _sgc = Math.Sqrt(sgt * sgt + _sgl * _sgl + vs);
+                _sgc = Math.Sqrt(sgtime * sgtime + _sglocation * _sglocation + vs);
                 break;
             case VariabilityMode.Individual:
-                yr = sgt * zt;
-                _sgc = Math.Sqrt(_sgl * _sgl + vs);
+                yr = sgtime * ztime;
+                _sgc = Math.Sqrt(_sglocation * _sglocation + vs);
                 break;
             case VariabilityMode.Mobile:
-                yr = Math.Sqrt(sgt * sgt + _sgl * _sgl) * zt;
+                yr = Math.Sqrt(sgtime * sgtime + _sglocation * _sglocation) * ztime;
                 _sgc = Math.Sqrt(vs);
                 break;
-            default:
-                yr = sgt * zt + _sgl * zl;
+            default: // VariabilityMode.Broadcast
+                yr = sgtime * ztime + _sglocation * zlocation;
                 _sgc = Math.Sqrt(vs);
                 break;
         }
-        var avarv = _referenceAttenuation - _vmd - yr - _sgc * zc;
+        var avarv = _referenceAttenuation - _vmd - yr - _sgc * zconfidence;
         if (avarv < 0)
             avarv = avarv * (29 - avarv) / (29 - 10 * avarv);
         return avarv;
@@ -825,7 +815,7 @@ internal class Refactored
         zn = a + b * (endIndex - xb);
     }
 
-    private static double qtile(int nn, double[] a, int ir)
+    private static double qtile(int n, double[] a, int ir)
     {
         double q = 0;
         int j1 = 0, i0 = 0;
@@ -833,7 +823,6 @@ internal class Refactored
         var goto10 = true;
 
         var m = 0;
-        var n = nn;
         var k = Math.Min(Math.Max(0, ir), n);
         while (!done)
         {
@@ -916,7 +905,7 @@ internal class Refactored
             xa += xb;
         }
         var d1thxv = qtile(n - 1, s.Points, ka - 1) - qtile(n - 1, s.Points, kb - 1);
-        d1thxv /= 1 - 0.8 * Math.Exp(-(x2 - x1) / 50000.0);
+        d1thxv /= 1 - 0.8 * Math.Exp(-(x2 - x1) / 50000);
         return d1thxv;
     }
 
@@ -973,8 +962,8 @@ internal class Refactored
     /// Point-To-Point Mode Calculations
     /// </summary>
     /// <param name="elevations"></param>
-    /// <param name="transmitterHeight"></param>
-    /// <param name="receiverHeight"></param>
+    /// <param name="transmitterHeight">Transmitter height in meters</param>
+    /// <param name="receiverHeight">Receiver height in meters</param>
     /// <param name="eps_dielect">Dielectric constant of ground</param>
     /// <param name="sgm_conductivity">Conductivity of ground in S/m</param>
     /// <param name="eno_ns_surfref">Surface refractivity in N-units</param>
@@ -982,27 +971,18 @@ internal class Refactored
     /// <param name="radioClimate"></param>
     /// <param name="polarization">Transmitting polarization</param>
     /// <param name="variabilityMode"></param>
-    /// <param name="timepct"></param>
-    /// <param name="locpct"></param>
-    /// <param name="confpct"></param>
+    /// <param name="timepct">0.01 to 0.99</param>
+    /// <param name="locpct">0.01 to 0.99</param>
+    /// <param name="confpct">0.01 to 0.99</param>
     /// <param name="dbLoss"></param>
     /// <param name="propmode"></param>
     /// <param name="deltaH">Terrain roughness in meters</param>
-    /// <param name="errnum"></param>
+    /// <param name="errorCode"></param>
     public void point_to_pointMDH(double[] elevations, double transmitterHeight, double receiverHeight,
             double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
             double frq_mhz, RadioClimate radioClimate, Polarization polarization, VariabilityMode variabilityMode, double timepct, double locpct, double confpct,
-            out double dbLoss, out PropMode propmode, out double deltaH, out int errnum)
-    // timepct, locpct, confpct: .01 to .99
+            out double dbLoss, out PropMode propmode, out double deltaH, out ErrorCode errorCode)
     // elevations[]: [num points - 1], [delta dist(meters)], [height(meters) point 1], ..., [height(meters) point n]
-    // errnum: 0- No Error.
-    //         1- Warning: Some parameters are nearly out of range.
-    //                     Results should be used with caution.
-    //         2- Note: Default parameters have been substituted for impossible ones.
-    //         3- Warning: A combination of parameters is out of range.
-    //                     Results are probably invalid.
-    //         Other-  Warning: Some parameters are out of range.
-    //                          Results are probably invalid.
     {
         _radioClimate = radioClimate;
         _changes = Changes.All;
@@ -1016,12 +996,14 @@ internal class Refactored
         var e = new Elevations(elevations);
         qlrps(frq_mhz, GetAverage(elevations), eno_ns_surfref, polarization, eps_dielect, sgm_conductivity);
         qlrpfl(e, _radioClimate, _variabilityMode);
-        var fs = 32.45 + 20 * Math.Log10(frq_mhz) + 20 * Math.Log10(_distance / 1000.0);
+        var fs = 32.45 + 20 * Math.Log10(frq_mhz) + 20 * Math.Log10(_distance / 1000);
         deltaH = _terrainIrregularity;
         propmode = GetPropMode();
         dbLoss = avar(qerfi(timepct), qerfi(locpct), qerfi(confpct)) + fs;
-        errnum = _errorCode;
+        errorCode = _errorCode;
     }
+
+    private void SetErrorCode(ErrorCode value) => _errorCode = (ErrorCode)Math.Max((int)_errorCode, (int)value);
 
     private double GetAverage(double[] elevations)
     {
@@ -1076,9 +1058,9 @@ internal class Refactored
     /// <param name="frq_mhz"></param>
     /// <param name="radioClimate"></param>
     /// <param name="polarization"></param>
-    /// <param name="pctTime"></param>
-    /// <param name="pctLoc"></param>
-    /// <param name="pctConf"></param>
+    /// <param name="pctTime">0.01 to 0.99</param>
+    /// <param name="pctLoc">0.01 to 0.99</param>
+    /// <param name="pctConf">0.01 to 0.99</param>
     /// <param name="dbLoss"></param>
     /// <param name="propmode"></param>
     /// <param name="errorCode"></param>
@@ -1086,17 +1068,8 @@ internal class Refactored
         double distance, SiteCriteria transmitterSiteCriteria, SiteCriteria receiverSiteCriteria,
         double eps_dielect, double sgm_conductivity, double eno_ns_surfref,
         double frq_mhz, RadioClimate radioClimate, Polarization polarization, double pctTime, double pctLoc,
-        double pctConf, out double dbLoss, out PropMode propmode, out int errorCode)
+        double pctConf, out double dbLoss, out PropMode propmode, out ErrorCode errorCode)
     {
-        // pctTime, pctLoc, pctConf: .01 to .99
-        // errorCode: 0- No Error.
-        //         1- Warning: Some parameters are nearly out of range.
-        //                     Results should be used with caution.
-        //         2- Note: Default parameters have been substituted for impossible ones.
-        //         3- Warning: A combination of parameters is out of range.
-        //                     Results are probably invalid.
-        //         Other-  Warning: Some parameters are out of range.
-        //                          Results are probably invalid.
         _terrainIrregularity = deltaH;
         _radioClimate = radioClimate;
         _surfaceRefractivity = eno_ns_surfref;
@@ -1109,7 +1082,7 @@ internal class Refactored
         if (_changes < Changes.Distance)
             _changes = Changes.Distance;
         ReferenceAttenuation(distance * 1000);
-        var fs = 32.45 + 20 * Math.Log10(frq_mhz) + 20 * Math.Log10(_distance / 1000.0);
+        var fs = 32.45 + 20 * Math.Log10(frq_mhz) + 20 * Math.Log10(_distance / 1000);
         dbLoss = fs + avar(qerfi(pctTime), qerfi(pctLoc), qerfi(pctConf)); ;
         errorCode = _errorCode;
         propmode = GetPropMode();
@@ -1131,4 +1104,37 @@ internal class Refactored
         VariabilityMode = 4,
         All = 5,
     }
+}
+
+public enum ErrorCode
+{
+    /// <summary>
+    /// No Error
+    /// </summary>
+    None = 0,
+    /// <summary>
+    /// Warning: Some parameters are nearly out of range
+    /// </summary>
+    /// <remarks>
+    /// Results should be used with caution
+    /// </remarks>
+    NearlyOutOfRange = 1,
+    /// <summary>
+    /// Default parameters have been substituted for impossible ones
+    /// </summary>
+    DefaultsUsed = 2,
+    /// <summary>
+    /// Warning: A combination of parameters is out of range
+    /// </summary>
+    /// <remarks>
+    /// Results are probably invalid
+    /// </remarks>
+    CombinationOutOfRange = 3,
+    /// <summary>
+    /// Warning: Some parameters are out of range
+    /// </summary>
+    /// <remarks>
+    /// Results are probably invalid
+    /// </remarks>
+    SomeOutOfRange = 4,
 }

@@ -13,7 +13,7 @@ public class Model : INotifyPropertyChanged
     private RadioClimate? _climate;
     private GroundQuality? _groundQuality;
     private Polarization? _polarization;
-    private int _errorIndicator;
+    private ErrorCode _errorCode;
 
     private const Polarization _defaultPolarization = Polarization.Vertical;
     private const GroundQuality _defaultGroundQuality = GroundQuality.Average;
@@ -189,25 +189,14 @@ public class Model : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// <list type="table">
-    /// <item><term>0</term><description>No Error</description></item>
-    /// <item><term>1</term><description>Warning: Some parameters are nearly out of range. Results should be used with caution.</description></item>
-    /// <item><term>2</term><description>Note: Default parameters have been substituted for impossible ones.</description></item>
-    /// <item><term>3</term><description>Warning: A combination of parameters is out of range. Results are probably invalid.</description></item>
-    /// <item><term>Other</term><description>Warning: Some parameters are out of range. Results are probably invalid.</description></item>
-    /// </list>
-    /// </summary>
-    public int ErrorIndicator
+    public ErrorCode ErrorCode
     {
-        get => _errorIndicator;
+        get => _errorCode;
         set
         {
-            if (ErrorIndicator != value)
+            if (ErrorCode != value)
             {
-                if (value < 0 || value > 4)
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Error indicator must be between 0 and 4");
-                _errorIndicator = value;
+                _errorCode = value;
                 OnPropertyChanged();
             }
         }
