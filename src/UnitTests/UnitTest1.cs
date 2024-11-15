@@ -50,13 +50,12 @@ namespace UnitTests
         [TestMethod]
         public void PointToPointModelTests()
         {
-            var model = new PointToPointModel(new double[2], 1);
+            var model = new PointToPointModel(new double[2], 1000);
             Assert.ThrowsException<ArgumentNullException>(() => model.Elevations = null);
             Assert.ThrowsException<ArgumentException>(() => model.Elevations = []);
             Assert.ThrowsException<ArgumentException>(() => model.Elevations = new double[1]);
             model.Elevations = new double[2];
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => model.Distance = int.MinValue);
-            model.Distance = 1;
         }
 
         [TestMethod]
