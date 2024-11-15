@@ -2,7 +2,6 @@ namespace LongleyRice;
 
 public enum TerrainType
 {
-    Default = Hills,
     /// <summary>
     /// Flat or Water
     /// </summary>

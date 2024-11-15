@@ -9,7 +9,7 @@ namespace LongleyRice;
 /// </summary>
 public class Antenna : INotifyPropertyChanged
 {
-    private double _height;
+    private double _height = 10;
     private SiteCriteria _siteCriteria = SiteCriteria.Random;
 
     /// <summary>

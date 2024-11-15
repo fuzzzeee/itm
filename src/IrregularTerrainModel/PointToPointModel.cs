@@ -4,7 +4,7 @@ namespace LongleyRice;
 
 public class PointToPointModel : Model
 {
-    private double _distance = 1;
+    private double _distance = 1000;
     private double[] _elevations;
 
     /// <summary>

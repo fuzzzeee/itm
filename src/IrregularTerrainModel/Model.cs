@@ -86,6 +86,8 @@ public class Model : INotifyPropertyChanged
         {
             if (Polarization != value)
             {
+                if (!Enum.IsDefined(typeof(Polarization), value))
+                    throw new ArgumentException($"Undefined polarization '{value}'", nameof(value));
                 _polarization = value;
                 OnPropertyChanged();
             }

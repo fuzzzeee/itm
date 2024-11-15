@@ -5,7 +5,6 @@ namespace LongleyRice;
 /// </summary>
 public enum SiteCriteria
 {
-    Default = Random,
     /// <summary>
     /// The choice of antenna sites is dictated by factors other than radio reception
     /// </summary>
