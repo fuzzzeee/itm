@@ -151,13 +151,13 @@ namespace UnitTests
             var flip = false;
             foreach (var model in GetElevations())
             {
-                foreach (var height in GetValues(0.5, 3000, 5))
+                foreach (var height in GetValues(0.5, 3000, 6))
                 {
-                    foreach (var frequency in GetValues(20, 20000, 7))
+                    foreach (var frequency in GetValues(20, 20000, 6))
                     {
                         foreach (var mode in Enum.GetValues<VariabilityMode>())
                         {
-                            foreach (var percent in GetValues(0.01, 0.99, 5))
+                            foreach (var percent in GetValues(0.01, 0.99, 6))
                             {
                                 foreach (var climate in Enum.GetValues<RadioClimate>())
                                 {
@@ -217,7 +217,7 @@ namespace UnitTests
                 double value;
                 do
                 {
-                    value = _random.NextDouble() * range;
+                    value = (_random.NextDouble() * range) + min;
                 } while (values.Contains(value));
                 values.Add(value);
             }
@@ -226,11 +226,11 @@ namespace UnitTests
 
         static IEnumerable<AreaModel> GetAreaModels()
         {
-            foreach (var height in GetValues(0.5, 3000, 5))
+            foreach (var height in GetValues(0.5, 3000, 8))
             {
-                foreach (var frequency in GetValues(20, 20000, 7))
+                foreach (var frequency in GetValues(20, 20000, 8))
                 {
-                    foreach (var percent in GetValues(0.01, 0.99, 5))
+                    foreach (var percent in GetValues(0.01, 0.99, 8))
                     {
                         foreach (var climate in Enum.GetValues<RadioClimate>())
                         {
