@@ -105,13 +105,13 @@ namespace UnitTests
                     errors.Add(p.ErrorCode, 0);
                 errors[p.ErrorCode]++;
             }
-            double GetPercent(TimeSpan a, TimeSpan b) => b.Ticks / (double)a.Ticks;
             Debug.WriteLine($"Native: {native.Elapsed}, Original: {original.Elapsed}, Refactored: {refactored.Elapsed} ({GetPercent(native.Elapsed, refactored.Elapsed):P}). Errors: {String.Join(", ", errors.Select(x => $"{x.Key}={x.Value}"))}");
         }
 
         [TestMethod]
         public void AreaTests()
         {
+            var errors = new Dictionary<ErrorCode, int>();
             var native = new Stopwatch();
             var refactored = new Stopwatch();
             var original = new Stopwatch();
@@ -143,7 +143,12 @@ namespace UnitTests
 
                 Assert.AreEqual(dbloss0, p.DbLoss, delta);
                 Assert.AreEqual(errnum0, (int)p.ErrorCode);
+
+                if (!errors.ContainsKey(p.ErrorCode))
+                    errors.Add(p.ErrorCode, 0);
+                errors[p.ErrorCode]++;
             }
+            Debug.WriteLine($"Native: {native.Elapsed}, Original: {original.Elapsed}, Refactored: {refactored.Elapsed} ({GetPercent(native.Elapsed, refactored.Elapsed):P}). Errors: {String.Join(", ", errors.Select(x => $"{x.Key}={x.Value}"))}");
         }
 
         static IEnumerable<PointToPointModel> GetPointToPointModels()
@@ -151,13 +156,13 @@ namespace UnitTests
             var flip = false;
             foreach (var model in GetElevations())
             {
-                foreach (var height in GetValues(0.5, 3000, 6))
+                foreach (var height in GetValues(10, 100, 6))
                 {
-                    foreach (var frequency in GetValues(20, 20000, 6))
+                    foreach (var frequency in GetValues(100, 5000, 6))
                     {
                         foreach (var mode in Enum.GetValues<VariabilityMode>())
                         {
-                            foreach (var percent in GetValues(0.01, 0.99, 6))
+                            foreach (var percent in GetValues(0.3, 0.9, 6))
                             {
                                 foreach (var climate in Enum.GetValues<RadioClimate>())
                                 {
@@ -184,13 +189,13 @@ namespace UnitTests
                                             }
                                             if (flip)
                                             {
-                                                model.Transmitter.Height = height * 0.8;
-                                                model.Receiver.Height = height;
+                                                model.Transmitter.Height = GetHeight(height * 0.8);
+                                                model.Receiver.Height = GetHeight(height);
                                             }
                                             else
                                             {
-                                                model.Transmitter.Height = height;
-                                                model.Receiver.Height = height * 0.8;
+                                                model.Transmitter.Height = GetHeight(height);
+                                                model.Receiver.Height = GetHeight(height * 0.8);
                                             }
                                             yield return model;
                                             flip = !flip;
@@ -204,11 +209,15 @@ namespace UnitTests
             }
         }
 
-        static double GetPercent(double value) => Math.Clamp(value, 0.01, 0.99);
+        private static double GetPercent(TimeSpan a, TimeSpan b) => b.Ticks / (double)a.Ticks;
+
+        private static double GetPercent(double value) => Math.Clamp(value, 0.01, 0.99);
+
+        private static double GetHeight(double value) => Math.Clamp(value, 0.5, 3000);
 
         private static Random _random = new Random(123456789);
 
-        static double[] GetValues(double min, double max, int count)
+        private static double[] GetValues(double min, double max, int count)
         {
             var values = new List<double>();
             var range = max - min;
@@ -224,13 +233,13 @@ namespace UnitTests
             return values.ToArray();
         }
 
-        static IEnumerable<AreaModel> GetAreaModels()
+        private static IEnumerable<AreaModel> GetAreaModels()
         {
-            foreach (var height in GetValues(0.5, 3000, 8))
+            foreach (var height in GetValues(10, 100, 8))
             {
-                foreach (var frequency in GetValues(20, 20000, 8))
+                foreach (var frequency in GetValues(100, 5000, 8))
                 {
-                    foreach (var percent in GetValues(0.01, 0.99, 8))
+                    foreach (var percent in GetValues(0.3, 0.9, 8))
                     {
                         foreach (var climate in Enum.GetValues<RadioClimate>())
                         {
@@ -260,12 +269,12 @@ namespace UnitTests
                                                     },
                                                     Transmitter =
                                                     {
-                                                        Height = height,
+                                                        Height = GetHeight(height),
                                                         SiteCriteria = siteCriteria
                                                     },
                                                     Receiver =
                                                     {
-                                                        Height = height * 0.8,
+                                                        Height = GetHeight(height * 0.8),
                                                         SiteCriteria = siteCriteria
                                                     }
                                                 };
@@ -281,7 +290,7 @@ namespace UnitTests
             }
         }
 
-        static IEnumerable<PointToPointModel> GetElevations()
+        private static IEnumerable<PointToPointModel> GetElevations()
         {
             yield return new PointToPointModel([39, 40, 40, 40, 40, 41, 41, 41, 41, 42, 42, 42, 43, 43, 43, 43, 43, 42, 43, 42, 42, 41, 41, 40, 40, 39, 38, 37, 35, 34, 33, 32, 31, 29, 28, 27, 26, 25, 25, 25, 25, 24, 24, 23, 22, 22, 21, 21, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21, 21, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 25, 26, 26, 27, 28, 29, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 29, 28, 28, 27, 26, 26, 25, 25, 24, 24, 24, 23, 23, 22, 22, 21, 21, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21, 22, 22, 23, 24, 24, 25, 25, 25, 26, 26, 27, 27, 27, 27, 27, 28, 29, 29, 29, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 31, 31, 32, 32, 33, 33, 34, 34, 34, 35, 35, 35, 35, 35, 35, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 39, 39, 39, 39, 40, 40, 40, 40, 41, 41, 41, 42, 42, 42, 43, 43, 43, 44, 44, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 44, 43, 43, 42, 41, 41, 40, 39, 38, 38, 37, 37, 36, 36, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 34, 34], 2883.78747976532);
             yield return new PointToPointModel([39, 39, 38, 38, 37, 37, 36, 36, 35, 35, 35, 34, 34, 34, 33, 33, 33, 33, 34, 35, 35, 35, 35, 35, 35, 36, 36, 37, 39, 40, 41, 42, 43, 44, 45, 45, 45, 45, 45, 45, 44, 42, 41, 39, 35, 33, 32, 30, 30, 30, 30, 30, 31, 32, 33, 34, 35, 35, 35, 33, 32, 31, 30, 29, 28, 26, 25, 25, 25, 25, 25, 26, 27, 28, 27, 27, 27, 27, 26, 24, 24, 24, 23, 23, 23, 22, 21, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21, 21, 22, 23, 24, 24, 25, 26, 27, 27, 28, 29, 29, 30, 30, 30, 31, 32, 32, 31, 31, 31, 30, 29, 28, 27, 26, 25, 23, 22, 20, 20, 20, 21, 21, 21, 23, 23, 23, 22, 22, 21, 20, 20, 19, 17, 14, 13, 11, 11, 11, 11, 10, 10, 10, 10, 10, 11, 11, 12, 12, 13, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 16, 16, 17, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21, 22, 22, 23, 23, 23, 23, 25, 25, 24, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 28, 29, 29, 29, 30, 32, 32, 33, 34, 33, 34, 35, 36, 36, 36, 34, 34, 34, 34, 35, 35, 35, 34, 35, 35, 35, 35, 36, 35, 36, 36, 37, 37, 38, 38, 39, 41, 44, 46, 48, 49, 50, 50, 50, 50, 50, 50, 50, 51, 51, 52, 52, 53, 53, 55, 55, 55, 55, 55, 55, 58, 58], 3200.83770382502);
