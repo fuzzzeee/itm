@@ -5,20 +5,17 @@ using System.Runtime.CompilerServices;
 
 namespace LongleyRice;
 
-public class Model : INotifyPropertyChanged
+public abstract class Model : INotifyPropertyChanged
 {
-    private double? _frequency, _surfaceRefractivity, _groundConductivity, _groundDialectric;
+    private double _frequency = 20;
+    private double? _surfaceRefractivity, _groundConductivity, _groundDialectric;
     protected double? _deltaH;
     private double _dbLoss;
-    private RadioClimate? _climate;
-    private GroundQuality? _groundQuality;
-    private Polarization? _polarization;
+    private RadioClimate _climate = RadioClimate.ContinentalTemperate;
+    private GroundQuality _groundQuality = GroundQuality.Average;
+    private Polarization _polarization = Polarization.Vertical;
     private ErrorCode _errorCode;
 
-    private const Polarization _defaultPolarization = Polarization.Vertical;
-    private const GroundQuality _defaultGroundQuality = GroundQuality.Average;
-    private const RadioClimate _defaultClimate = RadioClimate.ContinentalTemperate;
-    private const double _defaultFrequency = 20;
     private static readonly Dictionary<RadioClimate, int> _surfaceRefractivities = new Dictionary<RadioClimate, int>
     {
         {RadioClimate.Equatorial, 360},
@@ -51,7 +48,7 @@ public class Model : INotifyPropertyChanged
     /// </summary>
     public GroundQuality GroundQuality
     {
-        get => _groundQuality ?? _defaultGroundQuality;
+        get => _groundQuality;
         set
         {
             if (GroundQuality != value)
@@ -66,7 +63,7 @@ public class Model : INotifyPropertyChanged
 
     public RadioClimate Climate
     {
-        get => _climate ?? _defaultClimate;
+        get => _climate;
         set
         {
             if (Climate != value)
@@ -81,7 +78,7 @@ public class Model : INotifyPropertyChanged
 
     public Polarization Polarization
     {
-        get => _polarization ?? _defaultPolarization;
+        get => _polarization;
         set
         {
             if (Polarization != value)
@@ -99,7 +96,7 @@ public class Model : INotifyPropertyChanged
     /// </summary>
     public double Frequency
     {
-        get => _frequency ?? _defaultFrequency;
+        get => _frequency;
         set
         {
             if (Frequency != value)
@@ -145,7 +142,7 @@ public class Model : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Minimum monthly mean surface refractivity in N-units
+    /// Minimum monthly mean surface refractivity in N-units between 250 and 400
     /// </summary>
     public double SurfaceRefractivity
     {
