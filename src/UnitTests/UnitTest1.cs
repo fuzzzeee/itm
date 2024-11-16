@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace UnitTests
@@ -61,6 +62,7 @@ namespace UnitTests
         [TestMethod]
         public void PointToPointTests()
         {
+            var errors = new Dictionary<ErrorCode, int>();
             var native = new Stopwatch();
             var refactored = new Stopwatch();
             var original = new Stopwatch();
@@ -98,7 +100,13 @@ namespace UnitTests
                 Assert.AreEqual((int)propMode0, (int)p.PropMode);
                 Assert.AreEqual(deltaH0, p.DeltaH, delta);
                 Assert.AreEqual(errnum0, (int)p.ErrorCode);
+
+                if (!errors.ContainsKey(p.ErrorCode))
+                    errors.Add(p.ErrorCode, 0);
+                errors[p.ErrorCode]++;
             }
+            double GetPercent(TimeSpan a, TimeSpan b) => b.Ticks / (double)a.Ticks;
+            Debug.WriteLine($"Native: {native.Elapsed}, Original: {original.Elapsed}, Refactored: {refactored.Elapsed} ({GetPercent(native.Elapsed, refactored.Elapsed):P}). Errors: {String.Join(", ", errors.Select(x => $"{x.Key}={x.Value}"))}");
         }
 
         [TestMethod]
@@ -141,17 +149,15 @@ namespace UnitTests
         static IEnumerable<PointToPointModel> GetPointToPointModels()
         {
             var flip = false;
-
-            double GetPercent(double value) => Math.Clamp(value, 0.01, 0.99);
             foreach (var model in GetElevations())
             {
-                foreach (var height in new[] { 2, 5, 10, 50 })
+                foreach (var height in GetValues(0.5, 3000, 5))
                 {
-                    foreach (var frequency in new[] { 50, 107.7, 500, 915, 1000, 2400, 5000 })
+                    foreach (var frequency in GetValues(20, 20000, 7))
                     {
                         foreach (var mode in Enum.GetValues<VariabilityMode>())
                         {
-                            foreach (var percent in new[] { 0.01, 0.1, 0.5, 0.9, 0.99 })
+                            foreach (var percent in GetValues(0.01, 0.99, 5))
                             {
                                 foreach (var climate in Enum.GetValues<RadioClimate>())
                                 {
@@ -198,13 +204,33 @@ namespace UnitTests
             }
         }
 
+        static double GetPercent(double value) => Math.Clamp(value, 0.01, 0.99);
+
+        private static Random _random = new Random(123456789);
+
+        static double[] GetValues(double min, double max, int count)
+        {
+            var values = new List<double>();
+            var range = max - min;
+            for (var i = 0; i < count; i++)
+            {
+                double value;
+                do
+                {
+                    value = _random.NextDouble() * range;
+                } while (values.Contains(value));
+                values.Add(value);
+            }
+            return values.ToArray();
+        }
+
         static IEnumerable<AreaModel> GetAreaModels()
         {
-            foreach (var height in new[] { 2, 5, 10, 50 })
+            foreach (var height in GetValues(0.5, 3000, 5))
             {
-                foreach (var frequency in new[] { 50, 107.7, 500, 915, 1000, 2400, 5000 })
+                foreach (var frequency in GetValues(20, 20000, 7))
                 {
-                    foreach (var percent in new[] { 0.5, 0.9, 0.1 })
+                    foreach (var percent in GetValues(0.01, 0.99, 5))
                     {
                         foreach (var climate in Enum.GetValues<RadioClimate>())
                         {
@@ -228,9 +254,9 @@ namespace UnitTests
                                                     Variability =
                                                     {
                                                         Mode = variabilityMode,
-                                                        Confidence = Math.Max(0.01, percent * 0.9),
-                                                        Location = percent,
-                                                        Time = Math.Max(0.01, percent * 0.8)
+                                                        Confidence = GetPercent(percent * 0.9),
+                                                        Location = GetPercent(percent),
+                                                        Time = GetPercent(percent * 0.8)
                                                     },
                                                     Transmitter =
                                                     {
