@@ -153,7 +153,6 @@ namespace UnitTests
 
         static IEnumerable<PointToPointModel> GetPointToPointModels()
         {
-            var flip = false;
             foreach (var model in GetElevations())
             {
                 foreach (var height in GetValues(10, 100, 6))
@@ -170,35 +169,22 @@ namespace UnitTests
                                     {
                                         foreach (var ground in Enum.GetValues<GroundQuality>())
                                         {
-                                            model.Climate = climate;
-                                            model.GroundQuality = ground;
-                                            model.Frequency = frequency;
-                                            model.Polarization = polarization;
-                                            model.Variability.Mode = mode;
-                                            if (flip)
+                                            foreach (var siteCriteria in Enum.GetValues<SiteCriteria>())
                                             {
+                                                model.Climate = climate;
+                                                model.GroundQuality = ground;
+                                                model.Frequency = frequency;
+                                                model.Polarization = polarization;
+                                                model.Variability.Mode = mode;
                                                 model.Variability.Confidence = GetPercent(percent);
                                                 model.Variability.Time = GetPercent(percent);
                                                 model.Variability.Location = GetPercent(percent);
-                                            }
-                                            else
-                                            {
-                                                model.Variability.Location = GetPercent(percent);
-                                                model.Variability.Time = GetPercent(percent);
-                                                model.Variability.Confidence = GetPercent(percent);
-                                            }
-                                            if (flip)
-                                            {
                                                 model.Transmitter.Height = GetHeight(height);
+                                                model.Transmitter.SiteCriteria = siteCriteria;
                                                 model.Receiver.Height = GetHeight(height);
+                                                model.Receiver.SiteCriteria = siteCriteria;
+                                                yield return model;
                                             }
-                                            else
-                                            {
-                                                model.Transmitter.Height = GetHeight(height);
-                                                model.Receiver.Height = GetHeight(height);
-                                            }
-                                            yield return model;
-                                            flip = !flip;
                                         }
                                     }
                                 }
