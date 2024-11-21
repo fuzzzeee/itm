@@ -177,25 +177,25 @@ namespace UnitTests
                                             model.Variability.Mode = mode;
                                             if (flip)
                                             {
-                                                model.Variability.Confidence = GetPercent(percent * 1.1);
-                                                model.Variability.Time = GetPercent(percent * 1.2);
-                                                model.Variability.Location = GetPercent(percent * 1.3);
+                                                model.Variability.Confidence = GetPercent(percent);
+                                                model.Variability.Time = GetPercent(percent);
+                                                model.Variability.Location = GetPercent(percent);
                                             }
                                             else
                                             {
-                                                model.Variability.Location = GetPercent(percent * 0.7);
-                                                model.Variability.Time = GetPercent(percent * 0.8);
-                                                model.Variability.Confidence = GetPercent(percent * 0.9);
+                                                model.Variability.Location = GetPercent(percent);
+                                                model.Variability.Time = GetPercent(percent);
+                                                model.Variability.Confidence = GetPercent(percent);
                                             }
                                             if (flip)
                                             {
-                                                model.Transmitter.Height = GetHeight(height * 0.8);
+                                                model.Transmitter.Height = GetHeight(height);
                                                 model.Receiver.Height = GetHeight(height);
                                             }
                                             else
                                             {
                                                 model.Transmitter.Height = GetHeight(height);
-                                                model.Receiver.Height = GetHeight(height * 0.8);
+                                                model.Receiver.Height = GetHeight(height);
                                             }
                                             yield return model;
                                             flip = !flip;
@@ -211,9 +211,17 @@ namespace UnitTests
 
         private static double GetPercent(TimeSpan a, TimeSpan b) => b.Ticks / (double)a.Ticks;
 
-        private static double GetPercent(double value) => Math.Clamp(value, 0.01, 0.99);
+        private static double GetPercent(double value)
+        {
+            var multiplier = 0.5 + _random.NextDouble() * 2;
+            return Math.Clamp(value * multiplier, 0.01, 0.99);
+        }
 
-        private static double GetHeight(double value) => Math.Clamp(value, 0.5, 3000);
+        private static double GetHeight(double value)
+        {
+            var multiplier = 0.5 + _random.NextDouble() * 2;
+            return Math.Clamp(value * multiplier, 0.5, 3000);
+        }
 
         private static Random _random = new Random(123456789);
 
@@ -263,9 +271,9 @@ namespace UnitTests
                                                     Variability =
                                                     {
                                                         Mode = variabilityMode,
-                                                        Confidence = GetPercent(percent * 0.9),
+                                                        Confidence = GetPercent(percent),
                                                         Location = GetPercent(percent),
-                                                        Time = GetPercent(percent * 0.8)
+                                                        Time = GetPercent(percent)
                                                     },
                                                     Transmitter =
                                                     {
@@ -274,7 +282,7 @@ namespace UnitTests
                                                     },
                                                     Receiver =
                                                     {
-                                                        Height = GetHeight(height * 0.8),
+                                                        Height = GetHeight(height),
                                                         SiteCriteria = siteCriteria
                                                     }
                                                 };
