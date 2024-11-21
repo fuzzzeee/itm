@@ -155,7 +155,7 @@ namespace UnitTests
         {
             foreach (var model in GetElevations())
             {
-                foreach (var height in GetValues(10, 100, 6))
+                foreach (var height in GetValues(3, 100, 6))
                 {
                     foreach (var frequency in GetValues(100, 5000, 6))
                     {
